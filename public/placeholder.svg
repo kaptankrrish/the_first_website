@@ -1,0 +1,13 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" rx="12" fill="url(#gradient)"/>
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.2"/>
+      <stop offset="50%" stop-color="#8b5cf6" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#ec4899" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+  <circle cx="200" cy="140" r="40" fill="white" fill-opacity="0.1"/>
+  <path d="M185 140L195 150L215 130" stroke="white" stroke-opacity="0.3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="200" y="210" text-anchor="middle" fill="white" fill-opacity="0.3" font-family="system-ui" font-size="14">AI Knowledge</text>
+</svg>
