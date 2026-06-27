@@ -16,6 +16,7 @@ export default function MobileNav() {
     <>
       <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden glass-premium border-t border-white/5 safe-area-bottom" role="navigation" aria-label="Mobile navigation">
         <div className="absolute inset-0 mesh-gradient opacity-20 pointer-events-none" />
+        <div className="absolute inset-0 noise-overlay pointer-events-none" />
         <div className="flex items-center justify-around h-16 px-1 relative">
           {mobileMainItems.map((item) => {
             const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
@@ -30,7 +31,7 @@ export default function MobileNav() {
                 <motion.div
                   whileTap={{ scale: 0.85 }}
                   className={cn(
-                    'relative flex flex-col items-center justify-center h-full w-full gap-1 transition-all duration-300 touch-manipulation',
+                    'relative flex flex-col items-center justify-center h-full w-full gap-1 transition-all duration-200 touch-manipulation',
                     isActive ? 'text-blue-300' : 'text-white/40 hover:text-white/70'
                   )}
                 >
@@ -43,7 +44,7 @@ export default function MobileNav() {
                   )}
                   <item.icon
                     className={cn(
-                      'w-5 h-5 transition-all duration-300 shrink-0',
+                      'w-5 h-5 transition-all duration-200 shrink-0',
                       isActive && 'scale-110 drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]'
                     )}
                   />
@@ -69,13 +70,13 @@ export default function MobileNav() {
             <motion.div
               whileTap={{ scale: 0.85 }}
               className={cn(
-                'relative flex flex-col items-center justify-center h-full w-full gap-1 transition-all duration-300 touch-manipulation',
+                'relative flex flex-col items-center justify-center h-full w-full gap-1 transition-all duration-200 touch-manipulation',
                 moreOpen ? 'text-blue-300' : 'text-white/40 hover:text-white/70'
               )}
             >
               <MoreHorizontal
                 className={cn(
-                  'w-5 h-5 transition-all duration-300 shrink-0',
+                  'w-5 h-5 transition-all duration-200 shrink-0',
                   moreOpen && 'scale-110 drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]'
                 )}
               />
@@ -110,6 +111,7 @@ export default function MobileNav() {
               role="menu"
             >
               <div className="absolute inset-0 mesh-gradient opacity-20 pointer-events-none rounded-t-3xl" />
+              <div className="absolute inset-0 noise-overlay pointer-events-none rounded-t-3xl" />
               <div className="relative">
               <div className="flex justify-center mb-6">
                 <div className="w-12 h-1.5 rounded-full bg-white/20" />
@@ -133,7 +135,7 @@ export default function MobileNav() {
                           "w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-lg",
                           isActive 
                             ? "bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30 text-blue-300" 
-                            : "bg-white/5 border border-white/5 text-white/60 hover:bg-white/10"
+                            : "bg-white/5 border border-white/5 text-white/60 hover:bg-white/10 hover:scale-105"
                         )}>
                           <item.icon className="w-5 h-5" />
                         </div>

@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Search, FileText, Newspaper, BookOpen, Film, Bitcoin, Cloud, Loader2 } from 'lucide-react';
+import { Search, FileText, Newspaper, BookOpen, Film, Bitcoin, Cloud, Loader2, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -171,14 +171,16 @@ function SearchContent() {
         colorScheme="slate"
       />
 
+      {/* Command Palette Style Search */}
       <motion.div variants={itemVariants} className="relative z-20">
         <div className={cn(
           "relative transition-all duration-500 rounded-2xl",
-          isFocused ? "shadow-[0_0_40px_rgba(148,163,184,0.2)] scale-[1.01]" : "shadow-none scale-100"
+          isFocused ? "shadow-[0_0_60px_rgba(99,102,241,0.25)] scale-[1.01]" : "shadow-none scale-100"
         )}>
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 opacity-0 transition-opacity duration-500 pointer-events-none" style={{ opacity: isFocused ? 1 : 0 }} />
           <Search className={cn(
             "absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors duration-300",
-            isFocused ? "text-slate-300" : "text-white/40"
+            isFocused ? "text-blue-300" : "text-white/40"
           )} />
           <Input
             value={query}
@@ -189,7 +191,7 @@ function SearchContent() {
             className={cn(
               "pl-12 h-16 text-lg rounded-2xl border-2 transition-all duration-300",
               isFocused 
-                ? "bg-slate-900/80 border-slate-500/50 text-white placeholder:text-white/40" 
+                ? "bg-slate-900/80 border-blue-500/40 text-white placeholder:text-white/40" 
                 : "bg-white/5 border-white/10 text-white/90 placeholder:text-white/30 hover:bg-white/10"
             )}
             autoFocus
@@ -224,7 +226,7 @@ function SearchContent() {
               href={`https://www.google.com/search?q=${encodeURIComponent(debouncedQuery)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 transition-colors border border-blue-500/20 text-sm font-medium w-full sm:w-auto shadow-sm shadow-blue-500/10"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 transition-all border border-blue-500/20 text-sm font-medium w-full sm:w-auto shadow-sm shadow-blue-500/10 spring-hover"
             >
               <Search className="h-4 w-4" />
               Search Web
@@ -244,8 +246,11 @@ function SearchContent() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="flex flex-col items-center justify-center py-24 text-center"
             >
-              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
-                <Search className="h-8 w-8 text-white/20" />
+              <div className="relative w-24 h-24 mb-8">
+                <div className="absolute inset-0 bg-slate-500/20 rounded-full blur-xl animate-pulse" />
+                <div className="relative w-full h-full bg-slate-900/50 border border-slate-500/20 rounded-full flex items-center justify-center backdrop-blur-sm liquid-shape">
+                  <Search className="h-8 w-8 text-slate-400" />
+                </div>
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">{t.common.noResults}</h3>
               <p className="text-sm text-white/40 max-w-sm">
@@ -261,16 +266,26 @@ function SearchContent() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="flex flex-col items-center justify-center py-24 text-center"
             >
-              <div className="relative w-24 h-24 mb-8">
-                <div className="absolute inset-0 bg-slate-500/20 rounded-full blur-xl animate-pulse" />
-                <div className="relative w-full h-full bg-slate-900/50 border border-slate-500/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+              <div className="relative w-28 h-28 mb-8">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-xl animate-pulse" />
+                <div className="relative w-full h-full bg-slate-900/50 border border-slate-500/20 rounded-full flex items-center justify-center backdrop-blur-sm liquid-shape-morph">
                   <Search className="h-8 w-8 text-slate-400" />
                 </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center animate-breathe">
+                  <Sparkles className="w-4 h-4 text-blue-300" />
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Search Everything</h3>
+              <h3 className="text-xl font-semibold kinetic-text mb-2">Search Everything</h3>
               <p className="text-sm text-white/40 max-w-sm leading-relaxed">
                 Type a query above to search across articles, notes, vedic texts, movies, crypto, and weather.
               </p>
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
+                {['News', 'Notes', 'Vedic', 'Movies', 'Crypto', 'Weather'].map((cat) => (
+                  <span key={cat} className="px-3 py-1.5 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-white/[0.04] border border-white/[0.06] text-muted-foreground/50">
+                    {cat}
+                  </span>
+                ))}
+              </div>
             </motion.div>
           ) : (
             <motion.div
@@ -282,7 +297,7 @@ function SearchContent() {
             >
               {isSearchingExternal && (
                 <motion.div variants={itemVariants} className="flex justify-center mb-6">
-                  <Badge variant="outline" className="gap-2 px-3 py-1.5 border-slate-500/30 bg-slate-500/10 text-slate-300">
+                  <Badge variant="outline" className="gap-2 px-3 py-1.5 border-blue-500/30 bg-blue-500/10 text-blue-300">
                     <Loader2 className="h-3 w-3 animate-spin" />
                     Searching external sources...
                   </Badge>
@@ -318,7 +333,6 @@ function SearchContent() {
                     
                     <div className="grid gap-3 sm:grid-cols-2">
                       {category.data.map((item: any, i) => {
-                        // Extract common properties for rendering
                         const title = item.title || item.text || item.name;
                         const desc = item.description || item.content || item.explanation || item.author || item.overview || item.country || '';
                         const badge1 = item.category || item.folder || item.source || new Date(item.releaseDate).getFullYear() || item.symbol || '';
@@ -329,7 +343,7 @@ function SearchContent() {
                         return (
                           <motion.div key={item.id || i} variants={itemVariants}>
                             <Link href={href}>
-                              <Card className={`group h-full transition-all duration-300 ${colorMap[category.color]?.hoverBorder || 'hover:border-gray-500/40'} hover:bg-white/5 bg-white/[0.02] border-white/5 hover:shadow-lg ${colorMap[category.color]?.shadow || 'hover:shadow-gray-500/5'} hover:-translate-y-0.5`}>
+                              <Card className={`group h-full transition-all duration-300 ${colorMap[category.color]?.hoverBorder || 'hover:border-gray-500/40'} hover:bg-white/5 bg-white/[0.02] border-white/5 hover:shadow-lg ${colorMap[category.color]?.shadow || 'hover:shadow-gray-500/5'} card-hover-magnetic`}>
                                 <CardContent className="p-4 flex items-start gap-3 h-full">
                                   <div className="min-w-0 flex-1 flex flex-col h-full">
                                     <div className="text-sm font-medium text-white/90 group-hover:text-white transition-colors mb-1">

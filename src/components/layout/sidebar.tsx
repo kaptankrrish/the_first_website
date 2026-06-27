@@ -42,7 +42,7 @@ export default function Sidebar() {
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 left-4 z-50 lg:hidden glass-strong text-foreground hover:text-foreground h-10 w-10"
+        className="fixed top-4 left-4 z-50 lg:hidden glass-premium text-foreground hover:text-foreground h-10 w-10 rounded-xl"
         onClick={() => setMobileOpen(!mobileOpen)}
         aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
       >
@@ -71,13 +71,16 @@ export default function Sidebar() {
         role="navigation"
         aria-label="Sidebar navigation"
       >
+        {/* Liquid gradient accents */}
         <div className="absolute top-0 right-0 bottom-0 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none" />
-        <div className="absolute -top-32 -left-32 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 -right-20 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-32 -left-32 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none animate-morph" />
+        <div className="absolute -bottom-32 -right-20 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none animate-morph" style={{ animationDelay: '-6s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-pink-500/5 rounded-full blur-3xl pointer-events-none animate-liquid" />
 
+        {/* Logo */}
         <div className="relative flex items-center gap-3 p-5 border-b border-white/5">
           <div className="relative shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30 animate-glow-pulse">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30 animate-glow-breathe">
               <Bot className="w-5 h-5 text-white" />
             </div>
             <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-amber-300 animate-breathe" />
@@ -86,9 +89,9 @@ export default function Sidebar() {
             <motion.div initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} className="flex-1 min-w-0">
               <div className="font-semibold text-[15px] tracking-tight text-pretty">
                 <span className="text-foreground/90">Knowledge</span>{' '}
-                <span className="text-gradient">Base</span>
+                <span className="kinetic-text">Base</span>
               </div>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground/60 mt-0.5">AI Ecosystem v3</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground/60 mt-0.5">AI Ecosystem v4</div>
             </motion.div>
           )}
           <Button
@@ -120,7 +123,7 @@ export default function Sidebar() {
 
         {!sidebarCollapsed && (
           <div className="relative p-3 border-t border-white/5">
-            <div className="rounded-xl p-3 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/5 border border-white/5 relative overflow-hidden">
+            <div className="rounded-xl p-3 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/5 border border-white/5 relative overflow-hidden noise-overlay">
               <div className="absolute inset-0 mesh-gradient opacity-30 pointer-events-none" />
               <div className="relative flex items-center gap-2 mb-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
@@ -161,7 +164,7 @@ function SidebarSection({ items, pathname, collapsed, label }: { items: NavItem[
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.2, type: 'spring', stiffness: 300, damping: 25 }}
             className="space-y-0.5 overflow-hidden"
           >
             {items.map((item) => (
@@ -183,10 +186,10 @@ function SidebarItemComponent({ item, pathname, collapsed }: { item: NavItem; pa
     <Link
       href={item.href}
       className={cn(
-        'group relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 overflow-hidden min-h-[36px]',
+        'group relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 overflow-hidden min-h-[36px]',
         isActive
           ? 'bg-gradient-to-r from-blue-500/15 via-purple-500/10 to-transparent text-foreground'
-          : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.04]'
+          : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.04] hover:translate-x-0.5'
       )}
       aria-current={isActive ? 'page' : undefined}
     >
@@ -199,7 +202,7 @@ function SidebarItemComponent({ item, pathname, collapsed }: { item: NavItem; pa
       )}
       <item.icon
         className={cn(
-          'w-4 h-4 shrink-0 transition-all duration-300',
+          'w-4 h-4 shrink-0 transition-all duration-200',
           isActive
             ? 'text-blue-300 drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]'
             : 'text-muted-foreground/70 group-hover:text-foreground group-hover:scale-110'

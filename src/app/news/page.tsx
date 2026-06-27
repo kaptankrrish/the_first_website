@@ -28,6 +28,7 @@ import { getTimeAgo, truncate } from '@/utils';
 import type { Article, SavedItem } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/useToast';
+import { cn } from '@/utils/cn';
 import { type Translations } from '@/translations';
 import {
   Dialog,
@@ -137,6 +138,7 @@ export default function NewsPage() {
       <div className="relative overflow-hidden">
         <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute inset-0 noise-overlay pointer-events-none" />
 
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-start gap-3 sm:gap-4 min-w-0">
@@ -161,7 +163,7 @@ export default function NewsPage() {
                   AI News
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient leading-tight text-balance">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold kinetic-text leading-tight text-balance">
                 {t.news.title}
               </h1>
               <p className="text-sm text-muted-foreground/80 mt-1.5 max-w-2xl text-pretty">
@@ -325,9 +327,9 @@ export default function NewsPage() {
 
 function SkeletonGrid() {
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="bento-grid">
       {Array.from({ length: 8 }).map((_, i) => (
-        <Card key={i} className="overflow-hidden">
+        <Card key={i} className={cn("overflow-hidden", i === 0 ? "bento-span-2" : "")}>
           <Skeleton className="h-48 w-full rounded-none" />
           <CardHeader className="space-y-2">
             <Skeleton className="h-4 w-20" />
@@ -379,18 +381,21 @@ function ArticleGrid({
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        className="bento-grid"
       >
         <AnimatePresence mode="popLayout">
-          {articles.map((article) => (
+          {articles.map((article, index) => (
           <motion.div
             key={article.id}
             layout
             variants={cardVariants}
             exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+            className={cn(
+              index % 5 === 0 ? 'bento-span-2' : ''
+            )}
           >
             <Card
-              className="group relative flex h-full flex-col overflow-hidden transition-all duration-500 hover:border-blue-400/30 hover:shadow-2xl hover:shadow-blue-500/10 cursor-pointer shimmer-border"
+              className="group relative flex h-full flex-col overflow-hidden transition-all duration-300 hover:border-blue-400/30 hover:shadow-2xl hover:shadow-blue-500/10 cursor-pointer shimmer-border card-hover-magnetic"
               onClick={() => onCardClick?.(article)}
             >
               {/* Image */}
@@ -497,4 +502,3 @@ function ArticleGrid({
     </>
   );
 }
-

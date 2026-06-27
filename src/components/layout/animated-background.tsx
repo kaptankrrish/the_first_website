@@ -104,6 +104,8 @@ export default function AnimatedBackground() {
           style={{ animationDelay: '-12s' }}
         />
         <div className="absolute inset-0 grid-pattern opacity-30" />
+        {/* Noise texture overlay */}
+        <div className="absolute inset-0 noise-overlay" />
       </div>
       <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />
     </>
