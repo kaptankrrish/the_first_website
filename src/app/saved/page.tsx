@@ -1,17 +1,17 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Bookmark, Trash2, Heart, Library } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSavedStore } from '@/store';
 import { cn } from '@/utils/cn';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PageWrapper } from '@/components/layout/page-wrapper';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -59,147 +59,187 @@ export default function SavedPage() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="max-w-4xl mx-auto"
+      className="max-w-6xl mx-auto space-y-6"
     >
-      <div className="relative overflow-hidden mb-6">
-        <div className="absolute -top-20 -left-20 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
+      <PageWrapper
+        icon={Library}
+        title={t.nav.saved}
+        subtitle={t.saved.subtitle}
+        badgeText="My Library"
+        colorScheme="fuchsia"
+      />
 
-        <div className="relative flex items-start gap-3 sm:gap-4 min-w-0">
-          <motion.div
-            initial={{ scale: 0.5, rotate: -10, opacity: 0 }}
-            animate={{ scale: 1, rotate: 0, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 20 }}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-fuchsia-500/20 border border-white/10 flex items-center justify-center shrink-0 shadow-[0_0_24px_rgba(168,85,247,0.2)]"
-          >
-            <Library className="w-5 h-5 sm:w-6 sm:h-6 text-purple-200" />
-          </motion.div>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2 mb-1.5">
-              <span className="px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 text-[10px] font-semibold uppercase tracking-[0.18em] border border-purple-400/20 inline-flex items-center gap-1.5">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-purple-400 shadow-[0_0_6px_rgba(192,132,252,0.8)]" />
-                </span>
-                My Library
-              </span>
-              <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60 font-semibold">
-                {savedItems.length} saved
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient leading-tight text-balance">
-              {t.nav.saved}
-            </h1>
-            <p className="text-sm text-muted-foreground/80 mt-1.5 max-w-2xl text-pretty">
-              {t.saved.subtitle}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-5 h-px divider-gradient" />
-      </div>
-
-      <motion.div variants={itemVariants} className="mb-6">
-        <Tabs value={activeType} onValueChange={setActiveType}>
-          <TabsList className="flex-wrap h-auto p-1">
-            {types.map((type) => (
-              <TabsTrigger key={type} value={type} className="capitalize">
-                {type === 'all' ? t.todo.all : type}
-                {type !== 'all' && (
-                  <span className="ml-1.5 text-[10px] opacity-50">
-                    ({savedItems.filter((i) => i.type === type).length})
-                  </span>
+      <motion.div variants={itemVariants} className="mb-6 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex gap-2 min-w-max p-1 bg-white/5 rounded-xl border border-white/10 w-fit">
+          {types.map((type) => {
+            const isActive = activeType === type;
+            const count = savedItems.filter((i) => i.type === type).length;
+            
+            return (
+              <button
+                key={type}
+                onClick={() => setActiveType(type)}
+                className={cn(
+                  "relative px-4 py-2 rounded-lg text-sm font-medium transition-colors outline-none",
+                  isActive ? "text-white" : "text-white/60 hover:text-white hover:bg-white/5"
                 )}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute inset-0 bg-gradient-to-r from-fuchsia-500 to-pink-500 rounded-lg shadow-lg shadow-fuchsia-500/20"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-1.5 capitalize">
+                  {type === 'all' ? t.todo.all : type}
+                  {type !== 'all' && (
+                    <span className={cn(
+                      "text-[10px]",
+                      isActive ? "text-white/80" : "opacity-50"
+                    )}>
+                      ({count})
+                    </span>
+                  )}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </motion.div>
 
-      {savedItems.length === 0 ? (
-        <motion.div variants={itemVariants}>
-          <Card className="text-center py-16">
-            <CardContent>
-              <Heart className="h-16 w-16 mx-auto mb-4 text-white/10" />
-              <h3 className="text-xl font-semibold text-white mb-2">{t.saved.nothingSaved}</h3>
-              <p className="text-sm text-white/40 max-w-sm mx-auto mb-6">
-                {t.saved.startSaving}
-              </p>
-              <Link href="/news">
-                <Button variant="default">
-                  <Bookmark className="h-4 w-4 mr-2" />
-                  {t.common.browseContent}
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : filtered.length === 0 ? (
-        <motion.div variants={itemVariants}>
-          <Card className="text-center py-12">
-            <CardContent>
-              <Bookmark className="h-12 w-12 mx-auto mb-4 text-white/20" />
-              <h3 className="text-lg font-semibold text-white mb-2">{t.saved.noType} {activeType} {t.saved.items}</h3>
-              <p className="text-sm text-white/40">Try selecting a different category</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((item) => (
-            <motion.div key={item.id} variants={itemVariants} layout>
-              <Card className="group h-full transition-all duration-300 hover:border-emerald-500/30 hover:shadow-[0_0_30px_rgba(52,211,153,0.1)]">
-                {item.imageUrl && (
-                  <div className="relative h-36 overflow-hidden rounded-t-xl">
-                    <Image
-                      src={item.imageUrl}
-                      alt={item.title}
-                      fill
-                      unoptimized
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 290px"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  </div>
-                )}
-                <CardHeader className={cn(item.imageUrl ? 'pb-2' : '')}>
-                  <div className="flex items-start justify-between gap-2">
-                    <Badge variant={typeBadgeVariants[item.type] || 'secondary'} className="text-[10px] px-1.5 py-0">
-                      {typeIcons[item.type] || '📌'} {item.type}
-                    </Badge>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                      onClick={() => removeSavedItem(item.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                  <CardTitle className="text-sm text-white line-clamp-2 mt-1">{item.title}</CardTitle>
-                  {item.description && (
-                    <CardDescription className="text-xs line-clamp-2">{item.description}</CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-white/30">
-                      {t.common.saved} {new Date(item.savedAt).toLocaleDateString()}
-                    </span>
-                    {item.url && !item.url.startsWith('/') && (
-                      <a href={item.url} target="_blank" rel="noopener noreferrer">
-                        <Button variant="ghost" size="sm" className="h-7 text-[10px]">
-                          {t.common.open}
-                        </Button>
-                      </a>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+      <AnimatePresence mode="wait">
+        {savedItems.length === 0 ? (
+          <motion.div
+            key="empty-all"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ type: 'spring', damping: 20 }}
+            className="flex flex-col items-center justify-center py-24 px-4 text-center"
+          >
+            <motion.div
+              animate={{ 
+                y: [0, -15, 0],
+                rotate: [0, -5, 5, 0]
+              }}
+              transition={{ 
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="relative w-24 h-24 mb-6"
+            >
+              <div className="absolute inset-0 bg-fuchsia-500/20 rounded-full blur-2xl" />
+              <Heart className="w-full h-full text-white/20" />
             </motion.div>
-          ))}
-        </div>
-      )}
+            <h3 className="text-2xl font-bold text-white mb-2">{t.saved.nothingSaved}</h3>
+            <p className="text-sm text-white/50 max-w-sm mb-8 leading-relaxed">
+              {t.saved.startSaving}
+            </p>
+            <Link href="/news">
+              <Button className="bg-gradient-to-r from-fuchsia-500 to-pink-500 hover:from-fuchsia-600 hover:to-pink-600 text-white border-none shadow-lg shadow-fuchsia-500/20 rounded-full px-8">
+                <Bookmark className="h-4 w-4 mr-2" />
+                {t.common.browseContent}
+              </Button>
+            </Link>
+          </motion.div>
+        ) : filtered.length === 0 ? (
+          <motion.div
+            key="empty-filter"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="flex flex-col items-center justify-center py-20 px-4 text-center"
+          >
+            <Bookmark className="h-16 w-16 mb-4 text-white/10" />
+            <h3 className="text-xl font-semibold text-white mb-2">{t.saved.noType} <span className="capitalize text-fuchsia-400">{activeType}</span> {t.saved.items}</h3>
+            <p className="text-sm text-white/40">Try selecting a different category</p>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="grid"
+            className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6"
+          >
+            <AnimatePresence>
+              {filtered.map((item) => (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+                  className="break-inside-avoid"
+                >
+                  <Card className="group h-full transition-all duration-300 hover:border-fuchsia-500/30 hover:shadow-[0_0_30px_rgba(217,70,239,0.15)] bg-white/5 backdrop-blur-md overflow-hidden">
+                    {item.imageUrl && (
+                      <div className="relative h-48 overflow-hidden rounded-t-xl bg-white/5">
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.title}
+                          fill
+                          unoptimized
+                          className="object-cover transition-transform duration-700 group-hover:scale-110"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      </div>
+                    )}
+                    <CardHeader className={cn("relative z-10", item.imageUrl ? '-mt-12 pt-4 pb-2' : '')}>
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <Badge variant={typeBadgeVariants[item.type] || 'secondary'} className={cn(
+                          "text-[10px] px-2 py-0.5 backdrop-blur-md shadow-sm border-white/10",
+                          item.imageUrl ? "bg-black/50 text-white" : ""
+                        )}>
+                          {typeIcons[item.type] || '📌'} {item.type}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-all text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 rounded-full"
+                          onClick={() => removeSavedItem(item.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <CardTitle className={cn(
+                        "text-base leading-snug line-clamp-3",
+                        item.imageUrl ? "text-white" : "text-white/90"
+                      )}>
+                        {item.title}
+                      </CardTitle>
+                      {item.description && (
+                        <CardDescription className={cn(
+                          "text-sm line-clamp-3 mt-2",
+                          item.imageUrl ? "text-white/70" : "text-white/60"
+                        )}>
+                          {item.description}
+                        </CardDescription>
+                      )}
+                    </CardHeader>
+                    <CardContent className="pt-2">
+                      <div className="flex items-center justify-between border-t border-white/10 pt-4 mt-2">
+                        <span className="text-xs text-white/40 flex items-center gap-1.5">
+                          <Bookmark className="w-3 h-3" />
+                          {new Date(item.savedAt).toLocaleDateString()}
+                        </span>
+                        {item.url && !item.url.startsWith('/') && (
+                          <a href={item.url} target="_blank" rel="noopener noreferrer">
+                            <Button variant="ghost" size="sm" className="h-7 text-[10px] text-fuchsia-400 hover:text-fuchsia-300 hover:bg-fuchsia-500/10 rounded-full px-3">
+                              {t.common.open}
+                            </Button>
+                          </a>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

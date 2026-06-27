@@ -35,7 +35,8 @@ export function debounce<T extends (...args: unknown[]) => unknown>(fn: T, delay
 export function getImageUrl(url: string | null): string {
   if (!url) return '/placeholder.svg';
   if (url.startsWith('http')) return url;
-  return url;
+  if (url.startsWith('/')) return url;
+  return `/placeholder.svg`;
 }
 
 export function getTimeAgo(date: string): string {

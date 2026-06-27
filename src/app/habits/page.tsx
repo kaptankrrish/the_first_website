@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHabitStore } from '@/store';
 import { generateId } from '@/utils';
@@ -22,7 +22,17 @@ import {
 import * as Select from '@radix-ui/react-select';
 import { Check, Plus, Trash2, Flame, Target, CalendarDays, ChevronDown as ChevronDownIcon, Activity } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { LiveClock } from '@/components/ui/live-clock';
+import { PageWrapper } from '@/components/layout/page-wrapper';
+import type { Habit } from '@/types';
+
+interface HabitItemProps {
+  habit: Habit;
+  weekDays: string[];
+  today: string;
+  toggleHabit: (id: string, date: string) => void;
+  removeHabit: (id: string) => void;
+  t: ReturnType<typeof useLanguage>['t'];
+}
 
 const HABIT_COLORS = [
   '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
@@ -36,6 +46,73 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, scale: 1 },
   exit: { opacity: 0, x: -20, scale: 0.95 },
 };
+
+const HabitItem = memo(function HabitItem({ habit, weekDays, today, toggleHabit, removeHabit, t }: HabitItemProps) {
+  return (
+    <motion.div
+      layout
+      variants={itemVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      className="flex items-center gap-3 rounded-lg p-3 border border-white/5 hover:border-white/10 transition-all group bg-gradient-to-r from-transparent hover:from-white/5 to-transparent relative overflow-hidden card-shine"
+    >
+      <div className="flex items-center gap-3 flex-1 min-w-0 z-10">
+        <div
+          className="w-3 h-3 rounded-full shrink-0 shadow-lg"
+          style={{ backgroundColor: habit.color, boxShadow: `0 0 12px ${habit.color}80` }}
+        />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-white truncate">{habit.name}</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className={cn("flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-md", habit.streak > 0 ? "bg-orange-500/10 text-orange-400 border border-orange-500/20 shadow-[0_0_8px_rgba(249,115,22,0.3)]" : "text-white/40")}>
+              <Flame className="w-3 h-3" />
+              {t.habits.streak}: {habit.streak} {t.habits.days}
+            </span>
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 capitalize glass-1 border-white/10">
+              {habit.frequency === 'daily' ? t.habits.daily : t.habits.weekly}
+            </Badge>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-1 z-10">
+        {weekDays.map((date: string) => {
+          const done = habit.logs.includes(date);
+          const isToday = date === today;
+          return (
+            <button
+              key={date}
+              onClick={() => toggleHabit(habit.id, date)}
+              className={cn(
+                'w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium transition-all hover:scale-105 active:scale-95',
+                done
+                  ? 'text-white shadow-lg'
+                  : 'text-white/30 border border-white/10 hover:border-white/30 bg-black/20',
+                isToday && !done && 'ring-1 ring-white/30',
+                done && !isToday && 'opacity-80'
+              )}
+              style={{
+                backgroundColor: done ? habit.color : undefined,
+                boxShadow: done ? `0 4px 12px ${habit.color}40` : undefined,
+              }}
+              title={new Date(date).toLocaleDateString('en', { weekday: 'short' })}
+            >
+              {done ? <Check className="w-3.5 h-3.5" /> : new Date(date).getDate()}
+            </button>
+          );
+        })}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 ml-1 opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-opacity"
+          onClick={() => removeHabit(habit.id)}
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </Button>
+      </div>
+    </motion.div>
+  );
+});
 
 export default function HabitsPage() {
   const { t } = useLanguage();
@@ -101,139 +178,109 @@ export default function HabitsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="relative overflow-hidden">
-        <div className="absolute -top-20 -left-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex items-start gap-3 sm:gap-4 min-w-0">
-            <motion.div
-              initial={{ scale: 0.5, rotate: -10, opacity: 0 }}
-              animate={{ scale: 1, rotate: 0, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 20 }}
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-indigo-500/20 via-violet-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center shrink-0 shadow-[0_0_24px_rgba(139,92,246,0.2)]"
-            >
-              <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-200" />
-            </motion.div>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <span className="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 text-[10px] font-semibold uppercase tracking-[0.18em] border border-indigo-400/20 inline-flex items-center gap-1.5">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-indigo-400 shadow-[0_0_6px_rgba(129,140,248,0.8)]" />
-                  </span>
-                  Track Daily
-                </span>
-                <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60 font-semibold inline-flex items-center gap-1.5">
-                  <LiveClock />
-                </span>
+    <PageWrapper
+      icon={Activity}
+      title={t.nav.habits}
+      subtitle={t.habits.subtitle}
+      badgeText="Track Daily"
+      colorScheme="indigo"
+      actions={
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2 shrink-0 bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/25">
+              <Plus className="w-4 h-4" />
+              {t.habits.addHabit}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="glass-3 border-white/10">
+            <DialogHeader>
+              <DialogTitle>{t.habits.addHabit}</DialogTitle>
+              <DialogDescription>Define a habit you want to track</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div>
+                <label className="text-sm text-white/60 mb-1 block">Name</label>
+                <Input
+                  placeholder="e.g. Morning meditation"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="bg-black/20 border-white/10 focus-visible:ring-indigo-500"
+                />
               </div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient leading-tight text-balance">
-                {t.nav.habits}
-              </h1>
-              <p className="text-sm text-muted-foreground/80 mt-1.5 max-w-2xl text-pretty">
-                {t.habits.subtitle}
-              </p>
+              <div>
+                <label className="text-sm text-white/60 mb-1 block">Description</label>
+                <Input
+                  placeholder="Optional description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="bg-black/20 border-white/10 focus-visible:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-white/60 mb-1 block">Frequency</label>
+                <Select.Root value={frequency} onValueChange={(v) => setFrequency(v as 'daily' | 'weekly')}>
+                  <Select.Trigger className="flex h-10 w-full items-center justify-between rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white backdrop-blur-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <Select.Value />
+                    <Select.Icon>
+                      <ChevronDownIcon className="h-4 w-4 opacity-50" />
+                    </Select.Icon>
+                  </Select.Trigger>
+                  <Select.Portal>
+                    <Select.Content className="z-50 rounded-lg border border-white/10 bg-black/90 backdrop-blur-xl text-white shadow-xl">
+                      <Select.Viewport className="p-1">
+                        {FREQUENCIES.map((f) => (
+                          <Select.Item
+                            key={f}
+                            value={f}
+                            className="relative flex cursor-default select-none items-center rounded-md py-1.5 pl-8 pr-2 text-sm outline-none capitalize focus:bg-white/10 focus:text-white"
+                          >
+                            <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                              <Select.ItemIndicator>
+                                <Check className="h-4 w-4" />
+                              </Select.ItemIndicator>
+                            </span>
+                            <Select.ItemText>{f === 'daily' ? t.habits.daily : t.habits.weekly}</Select.ItemText>
+                          </Select.Item>
+                        ))}
+                      </Select.Viewport>
+                    </Select.Content>
+                  </Select.Portal>
+                </Select.Root>
+              </div>
+              <div>
+                <label className="text-sm text-white/60 mb-2 block">Color</label>
+                <div className="flex gap-2 flex-wrap">
+                  {HABIT_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setColor(c)}
+                      className={cn(
+                        'w-8 h-8 rounded-full transition-all border-2 hover:scale-110',
+                        color === c ? 'border-white scale-110 shadow-lg' : 'border-transparent'
+                      )}
+                      style={{ backgroundColor: c, boxShadow: color === c ? `0 0 16px ${c}80` : undefined }}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <DialogClose asChild>
+                  <Button variant="outline" className="border-white/10 hover:bg-white/5">{t.common.cancel}</Button>
+                </DialogClose>
+                <Button onClick={handleAdd} className="bg-indigo-500 hover:bg-indigo-600 text-white">{t.common.create}</Button>
+              </div>
             </div>
-          </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2 shrink-0">
-                <Plus className="w-4 h-4" />
-                {t.habits.addHabit}
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t.habits.addHabit}</DialogTitle>
-                <DialogDescription>Define a habit you want to track</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div>
-                  <label className="text-sm text-white/60 mb-1 block">Name</label>
-                  <Input
-                    placeholder="e.g. Morning meditation"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-white/60 mb-1 block">Description</label>
-                  <Input
-                    placeholder="Optional description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-white/60 mb-1 block">Frequency</label>
-                  <Select.Root value={frequency} onValueChange={(v) => setFrequency(v as 'daily' | 'weekly')}>
-                    <Select.Trigger className="flex h-10 w-full items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white backdrop-blur-xl focus:outline-none focus:ring-2 focus:ring-white/30">
-                      <Select.Value />
-                      <Select.Icon>
-                        <ChevronDownIcon className="h-4 w-4 opacity-50" />
-                      </Select.Icon>
-                    </Select.Trigger>
-                    <Select.Portal>
-                      <Select.Content className="z-50 rounded-lg border border-white/10 bg-black/90 backdrop-blur-xl text-white shadow-lg">
-                        <Select.Viewport className="p-1">
-                          {FREQUENCIES.map((f) => (
-                            <Select.Item
-                              key={f}
-                              value={f}
-                              className="relative flex cursor-default select-none items-center rounded-md py-1.5 pl-8 pr-2 text-sm outline-none capitalize focus:bg-white/10 focus:text-white"
-                            >
-                              <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-                                <Select.ItemIndicator>
-                                  <Check className="h-4 w-4" />
-                                </Select.ItemIndicator>
-                              </span>
-                              <Select.ItemText>{f === 'daily' ? t.habits.daily : t.habits.weekly}</Select.ItemText>
-                            </Select.Item>
-                          ))}
-                        </Select.Viewport>
-                      </Select.Content>
-                    </Select.Portal>
-                  </Select.Root>
-                </div>
-                <div>
-                  <label className="text-sm text-white/60 mb-2 block">Color</label>
-                  <div className="flex gap-2 flex-wrap">
-                    {HABIT_COLORS.map((c) => (
-                      <button
-                        key={c}
-                        onClick={() => setColor(c)}
-                        className={cn(
-                          'w-8 h-8 rounded-full transition-all border-2',
-                          color === c ? 'border-white scale-110' : 'border-transparent'
-                        )}
-                        style={{ backgroundColor: c }}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div className="flex justify-end gap-2 pt-2">
-                  <DialogClose asChild>
-                    <Button variant="outline">{t.common.cancel}</Button>
-                  </DialogClose>
-                  <Button onClick={handleAdd}>{t.common.create}</Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        <div className="mt-5 h-px divider-gradient" />
-      </div>
-
+          </DialogContent>
+        </Dialog>
+      }
+    >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
-            <Card>
+            <Card className="card-premium overflow-hidden">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="w-4 h-4" />
+                <CardTitle className="flex items-center gap-2 text-indigo-100">
+                  <Target className="w-4 h-4 text-indigo-400" />
                   This Week
                 </CardTitle>
                 <CardDescription>Check off today&apos;s habits</CardDescription>
@@ -241,76 +288,23 @@ export default function HabitsPage() {
               <CardContent>
                 {habits.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-white/40">
-                    <Target className="w-12 h-12 mb-3 opacity-30" />
+                    <Target className="w-12 h-12 mb-3 opacity-30 text-indigo-300" />
                     <p className="text-sm font-medium">{t.habits.noHabits}</p>
-                    <p className="text-xs mt-1">Create your first habit to get started</p>
+                    <p className="text-xs mt-1 text-white/30">Create your first habit to get started</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <AnimatePresence mode="popLayout">
                       {habits.map((habit) => (
-                        <motion.div
-                          key={habit.id}
-                          layout
-                          variants={itemVariants}
-                          initial="hidden"
-                          animate="visible"
-                          exit="exit"
-                          className="flex items-center gap-3 rounded-lg p-3 border border-white/5 hover:border-white/10 transition-all group"
-                        >
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <div
-                              className="w-3 h-3 rounded-full shrink-0"
-                              style={{ backgroundColor: habit.color }}
-                            />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-white truncate">{habit.name}</p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className="flex items-center gap-1 text-xs text-white/40">
-                                  <Flame className="w-3 h-3" />
-                                  {t.habits.streak}: {habit.streak} {t.habits.days}
-                                </span>
-                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 capitalize">
-                                  {habit.frequency === 'daily' ? t.habits.daily : t.habits.weekly}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            {weekDays.map((date) => {
-                              const done = habit.logs.includes(date);
-                              const isToday = date === today;
-                              return (
-                                <button
-                                  key={date}
-                                  onClick={() => toggleHabit(habit.id, date)}
-                                  className={cn(
-                                    'w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium transition-all',
-                                    done
-                                      ? 'text-white'
-                                      : 'text-white/30 border border-white/10 hover:border-white/30',
-                                    isToday && 'ring-1 ring-white/30',
-                                    done && !isToday && 'opacity-80'
-                                  )}
-                                  style={{
-                                    backgroundColor: done ? habit.color : 'transparent',
-                                  }}
-                                  title={new Date(date).toLocaleDateString('en', { weekday: 'short' })}
-                                >
-                                  {done ? <Check className="w-3.5 h-3.5" /> : new Date(date).getDate()}
-                                </button>
-                              );
-                            })}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 ml-1 opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-opacity"
-                              onClick={() => removeHabit(habit.id)}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          </div>
-                        </motion.div>
+                        <HabitItem 
+                          key={habit.id} 
+                          habit={habit} 
+                          weekDays={weekDays} 
+                          today={today} 
+                          toggleHabit={toggleHabit} 
+                          removeHabit={removeHabit} 
+                          t={t} 
+                        />
                       ))}
                     </AnimatePresence>
                   </div>
@@ -320,10 +314,10 @@ export default function HabitsPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
-            <Card>
+            <Card className="card-premium">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CalendarDays className="w-4 h-4" />
+                <CardTitle className="flex items-center gap-2 text-indigo-100">
+                  <CalendarDays className="w-4 h-4 text-indigo-400" />
                   Monthly Heatmap
                 </CardTitle>
                 <CardDescription>
@@ -331,9 +325,9 @@ export default function HabitsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-7 gap-1">
+                <div className="grid grid-cols-7 gap-1.5">
                   {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-                    <div key={d} className="text-[10px] text-white/30 text-center py-1">
+                    <div key={d} className="text-[10px] text-white/30 text-center py-1 font-medium">
                       {d}
                     </div>
                   ))}
@@ -349,14 +343,15 @@ export default function HabitsPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: i * 0.005 }}
                         className={cn(
-                          'aspect-square rounded-md flex items-center justify-center text-[10px] font-medium transition-all',
-                          isToday && 'ring-1 ring-white/40',
+                          'aspect-square rounded-md flex items-center justify-center text-[10px] font-medium transition-all hover:scale-110 cursor-default hover:z-10',
+                          isToday && 'ring-2 ring-indigo-400/50 shadow-[0_0_12px_rgba(129,140,248,0.5)]',
                           intensity > 0
-                            ? `text-white`
-                            : 'text-white/20 bg-white/5'
+                            ? 'text-white shadow-sm'
+                            : 'text-white/20 bg-black/20 hover:bg-white/10'
                         )}
                         style={{
-                          backgroundColor: intensity > 0 ? `rgba(59, 130, 246, ${0.2 + intensity * 0.6})` : undefined,
+                          backgroundColor: intensity > 0 ? `rgba(99, 102, 241, ${0.2 + intensity * 0.8})` : undefined,
+                          boxShadow: intensity > 0 ? `0 0 ${8 * intensity}px rgba(99, 102, 241, ${intensity})` : undefined,
                         }}
                         title={`${date}: ${dayHabits.length}/${habits.length} habits`}
                       >
@@ -372,60 +367,62 @@ export default function HabitsPage() {
 
         <div className="space-y-4">
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.3 }}>
-            <Card>
+            <Card className="card-premium shimmer-border">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Flame className="w-4 h-4" />
+                <CardTitle className="flex items-center gap-2 text-indigo-100">
+                  <Flame className="w-4 h-4 text-orange-400" />
                   Statistics
                 </CardTitle>
                 <CardDescription>Your habit tracking stats</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-white/60">Longest Streak</span>
-                    <span className="text-lg font-bold text-white">{stats.longestStreak} days</span>
+              <CardContent className="space-y-5">
+                <div className="group">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors">Longest Streak</span>
+                    <span className="text-lg font-bold text-white flex items-center gap-1">
+                      {stats.longestStreak} <span className="text-sm font-normal text-white/40">days</span>
+                    </span>
                   </div>
-                  <Progress value={Math.min(stats.longestStreak * 10, 100)} className="h-1.5" />
+                  <Progress value={Math.min(stats.longestStreak * 10, 100)} className="h-2 bg-black/40" />
                 </div>
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-white/60">Active Habits</span>
+                <div className="group">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors">Active Habits</span>
                     <span className="text-lg font-bold text-white">{stats.total}</span>
                   </div>
-                  <Progress value={Math.min(stats.total * 20, 100)} className="h-1.5" />
+                  <Progress value={Math.min(stats.total * 20, 100)} className="h-2 bg-black/40" />
                 </div>
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-white/60">Completion Rate</span>
+                <div className="group">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors">Completion Rate</span>
                     <span className="text-lg font-bold text-white">{Math.round(stats.avgCompletion)}%</span>
                   </div>
-                  <Progress value={stats.avgCompletion} className="h-1.5" />
+                  <Progress value={stats.avgCompletion} className="h-2 bg-black/40" />
                 </div>
               </CardContent>
             </Card>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
-            <Card>
+            <Card className="card-premium">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="w-4 h-4" />
+                <CardTitle className="flex items-center gap-2 text-indigo-100">
+                  <Target className="w-4 h-4 text-indigo-400" />
                   Quick Stats
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {habits.slice(0, 5).map((habit) => {
                     const weekHits = weekDays.filter((d) => habit.logs.includes(d)).length;
                     return (
-                      <div key={habit.id} className="flex items-center gap-2">
+                      <div key={habit.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
                         <div
-                          className="w-2 h-2 rounded-full shrink-0"
-                          style={{ backgroundColor: habit.color }}
+                          className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
+                          style={{ backgroundColor: habit.color, boxShadow: `0 0 8px ${habit.color}80` }}
                         />
-                        <span className="text-xs text-white/60 flex-1 truncate">{habit.name}</span>
-                        <span className="text-xs text-white/40">{weekHits}/{weekDays.length}</span>
+                        <span className="text-sm text-white/80 flex-1 truncate">{habit.name}</span>
+                        <span className="text-xs font-medium text-white/50 bg-black/20 px-2 py-1 rounded-md">{weekHits}/{weekDays.length}</span>
                       </div>
                     );
                   })}
@@ -440,6 +437,6 @@ export default function HabitsPage() {
           </motion.div>
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

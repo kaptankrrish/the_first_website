@@ -95,6 +95,10 @@ export default function HomePage() {
           className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-pink-500/8 blur-[100px] rounded-full pointer-events-none animate-aurora"
           style={{ animationDelay: '-12s' }}
         />
+        {/* Mesh gradient background */}
+        <div className="absolute inset-0 mesh-gradient opacity-60 pointer-events-none" />
+        {/* Animated grid lines */}
+        <div className="absolute inset-0 grid-pattern opacity-30 pointer-events-none" />
 
         <motion.div
           initial={{ opacity: 0, y: 32 }}
@@ -107,14 +111,14 @@ export default function HomePage() {
               <ClockIcon className="h-3 w-3 mr-1.5 text-blue-400" />
               <LiveClock />
             </Badge>
-            <Badge variant="secondary" className="px-3 sm:px-4 py-1.5 text-[11px] font-semibold tracking-wider bg-gradient-to-r from-blue-500/15 to-purple-500/15 border-blue-400/20 text-blue-300 uppercase backdrop-blur-md">
+            <Badge variant="secondary" className="px-3 sm:px-4 py-1.5 text-[11px] font-semibold tracking-wider bg-gradient-to-r from-blue-500/15 to-purple-500/15 border-blue-400/20 text-blue-300 uppercase backdrop-blur-md animate-pulse-soft">
               <Sparkles className="h-3 w-3 mr-1.5" />
               {(t.home as { knowledgeEcosystem?: string }).knowledgeEcosystem || 'Knowledge Ecosystem'}
             </Badge>
           </div>
 
           <h1 className="text-[2.75rem] sm:text-6xl md:text-7xl lg:text-[5.5rem] font-black tracking-[-0.04em] mb-6 leading-[1.05] text-balance">
-            <span className="text-gradient-aurora">Infinite</span>
+            <span className="text-gradient-aurora text-shadow-glow">Infinite</span>
             <br />
             <span className="text-foreground/90">Knowledge Base</span>
           </h1>
@@ -127,7 +131,7 @@ export default function HomePage() {
             <Link href="/news" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="w-full sm:w-auto bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-400 hover:via-purple-400 hover:to-pink-400 text-white px-6 sm:px-8 py-6 sm:py-7 rounded-2xl text-sm sm:text-base font-semibold transition-all group shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/40"
+                className="w-full sm:w-auto bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-400 hover:via-purple-400 hover:to-pink-400 text-white px-6 sm:px-8 py-6 sm:py-7 rounded-2xl text-sm sm:text-base font-semibold transition-all group shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/40 ai-glow"
               >
                 <Newspaper className="mr-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:scale-110 transition-transform" />
                 {t.home.newsFeed}
@@ -138,7 +142,7 @@ export default function HomePage() {
               <Button
                 variant="outline"
                 size="lg"
-                className="w-full sm:w-auto glass hover:bg-white/[0.06] border-white/10 hover:border-white/20 px-6 sm:px-8 py-6 sm:py-7 rounded-2xl text-sm sm:text-base font-medium transition-all group"
+                className="w-full sm:w-auto glass hover:bg-white/[0.06] border-white/10 hover:border-white/20 px-6 sm:px-8 py-6 sm:py-7 rounded-2xl text-sm sm:text-base font-medium transition-all group ai-border"
               >
                 <Search className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-blue-300 transition-colors" />
                 {t.common.search}
@@ -146,6 +150,23 @@ export default function HomePage() {
               </Button>
             </Link>
           </div>
+
+          {/* Feature pills */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            className="flex flex-wrap items-center justify-center gap-2 mt-8"
+          >
+            {['Real-time News', 'AI Learning', 'Crypto Tracking', 'Weather', 'Productivity'].map((feature) => (
+              <span
+                key={feature}
+                className="px-3 py-1.5 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-white/[0.04] border border-white/[0.06] text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] hover:border-white/[0.12] transition-all cursor-default"
+              >
+                {feature}
+              </span>
+            ))}
+          </motion.div>
 
           {!hasCompletedTour && (
             <motion.button
@@ -204,16 +225,17 @@ export default function HomePage() {
               <motion.div
                 key={stat.key}
                 variants={itemVariants}
-                className="relative overflow-hidden glass-strong rounded-2xl p-4 sm:p-6 text-center hover-lift group shimmer-border"
+                className="relative overflow-hidden glass-premium rounded-2xl p-4 sm:p-6 text-center hover-lift group card-magnetic"
               >
                 <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-400/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="inline-flex items-center justify-center p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-blue-500/12 to-purple-500/12 border border-white/5 text-blue-300 mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative inline-flex items-center justify-center p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-blue-500/12 to-purple-500/12 border border-white/5 text-blue-300 mb-3 sm:mb-4 group-hover:scale-110 group-hover:shadow-[0_0_24px_rgba(96,165,250,0.3)] transition-all duration-300">
                   <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <div className="text-2xl sm:text-3xl font-bold text-foreground mb-1 tracking-tight">
+                <div className="relative text-2xl sm:text-3xl font-bold text-foreground mb-1 tracking-tight">
                   <AnimatedCounter target={stat.value} suffix={stat.suffix} />
                 </div>
-                <div className="text-[10px] sm:text-xs font-semibold text-muted-foreground/60 uppercase tracking-[0.15em]">{displayLabel}</div>
+                <div className="relative text-[10px] sm:text-xs font-semibold text-muted-foreground/60 uppercase tracking-[0.15em]">{displayLabel}</div>
               </motion.div>
             );
           })}
@@ -240,9 +262,10 @@ export default function HomePage() {
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="px-4 sm:px-0"
       >
-        <div className="max-w-4xl mx-auto relative p-8 sm:p-12 lg:p-16 rounded-3xl glass-strong shadow-2xl overflow-hidden group">
+        <div className="max-w-4xl mx-auto relative p-8 sm:p-12 lg:p-16 rounded-3xl glass-premium shadow-2xl overflow-hidden group">
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/12 blur-[80px] rounded-full group-hover:bg-blue-500/20 transition-colors duration-700" />
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500/12 blur-[80px] rounded-full group-hover:bg-purple-500/20 transition-colors duration-700" />
+          <div className="absolute inset-0 mesh-gradient opacity-30 pointer-events-none" />
 
           <div className="relative">
             <div className="inline-flex items-center gap-2 mb-5">

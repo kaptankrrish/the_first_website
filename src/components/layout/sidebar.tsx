@@ -4,11 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Home, Newspaper, Beaker, Quote, BookOpen, Cloud, DollarSign, Film,
-  LayoutDashboard, GraduationCap, Atom, Calculator, BookMarked,
-  BookText, Languages, FileText, CheckSquare, Timer, Moon, PenTool,
-  Key, Palette, Percent, HomeIcon, Search, Bookmark, Settings,
-  ChevronLeft, ChevronRight, Bot, Menu, X, Sparkles, BarChart3, Zap,
+  ChevronLeft, ChevronRight, Bot, Menu, X, Sparkles, ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useAppStore } from '@/store';
@@ -17,86 +13,15 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import LanguageSwitcher from '@/components/layout/language-switcher';
 import { useLanguage } from '@/contexts/LanguageContext';
-
-interface SidebarItem {
-  icon: React.ElementType;
-  label: string;
-  href: string;
-  badge?: string;
-  translationKey: 'home' | 'dashboard' | 'news' | 'search' | 'science' | 'chemistry' | 'physics' | 'maths' | 'dailyLearning' | 'vedicLearning' | 'vedas' | 'upanishads' | 'translations' | 'slokas' | 'weather' | 'crypto' | 'movies' | 'quotes' | 'blogs' | 'todo' | 'pomodoro' | 'habits' | 'notes' | 'passwordGen' | 'gradientGen' | 'tipCalc' | 'mortgageCalc' | 'saved' | 'settings' | 'analytics';
-}
+import {
+  mainItems, learnItems, mediaItems, productivityItems, toolsItems, bottomItems, type NavItem,
+} from '@/lib/nav-items';
 
 const sectionLabels: Record<string, Record<string, string>> = {
-  en: {
-    Main: 'Main',
-    Learning: 'Learning',
-    Media: 'Media',
-    Productivity: 'Productivity',
-    Tools: 'Tools'
-  },
-  hi: {
-    Main: 'मुख्य',
-    Learning: 'सीखना',
-    Media: 'मीडिया',
-    Productivity: 'उत्पादकता',
-    Tools: 'उपकरण'
-  },
-  es: {
-    Main: 'Principal',
-    Learning: 'Aprendizaje',
-    Media: 'Medios',
-    Productivity: 'Productividad',
-    Tools: 'Herramientas'
-  }
+  en: { Main: 'Main', Learning: 'Learning', Media: 'Media', Productivity: 'Productivity', Tools: 'Tools' },
+  hi: { Main: 'मुख्य', Learning: 'सीखना', Media: 'मीडिया', Productivity: 'उत्पादकता', Tools: 'उपकरण' },
+  es: { Main: 'Principal', Learning: 'Aprendizaje', Media: 'Medios', Productivity: 'Productividad', Tools: 'Herramientas' },
 };
-
-const mainItems: SidebarItem[] = [
-  { icon: Home, label: 'Home', href: '/', translationKey: 'home' },
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', translationKey: 'dashboard' },
-  { icon: BarChart3, label: 'Analytics', href: '/analytics', translationKey: 'analytics' },
-  { icon: Newspaper, label: 'News', href: '/news', translationKey: 'news' },
-  { icon: Search, label: 'Search', href: '/search', translationKey: 'search' },
-];
-
-const learnItems: SidebarItem[] = [
-  { icon: Beaker, label: 'Science', href: '/science', translationKey: 'science' },
-  { icon: Atom, label: 'Chemistry', href: '/chemistry', translationKey: 'chemistry' },
-  { icon: Zap, label: 'Physics', href: '/physics', translationKey: 'physics' },
-  { icon: Calculator, label: 'Maths', href: '/maths', translationKey: 'maths' },
-  { icon: GraduationCap, label: 'Daily Learning', href: '/daily-learning', translationKey: 'dailyLearning' },
-  { icon: BookMarked, label: 'Vedic Learning', href: '/vedic-learning', translationKey: 'vedicLearning' },
-  { icon: BookText, label: 'Vedas', href: '/vedas', translationKey: 'vedas' },
-  { icon: BookText, label: 'Upanishads', href: '/upanishads', translationKey: 'upanishads' },
-  { icon: Languages, label: 'Translations', href: '/translations', translationKey: 'translations' },
-  { icon: FileText, label: 'Slokas', href: '/slokas', translationKey: 'slokas' },
-];
-
-const mediaItems: SidebarItem[] = [
-  { icon: Cloud, label: 'Weather', href: '/weather', translationKey: 'weather' },
-  { icon: DollarSign, label: 'Crypto', href: '/crypto', translationKey: 'crypto' },
-  { icon: Film, label: 'Movies', href: '/movies', translationKey: 'movies' },
-  { icon: Quote, label: 'Quotes', href: '/quotes', translationKey: 'quotes' },
-  { icon: BookOpen, label: 'Blogs', href: '/blogs', translationKey: 'blogs' },
-];
-
-const productivityItems: SidebarItem[] = [
-  { icon: CheckSquare, label: 'Todo', href: '/todo', translationKey: 'todo' },
-  { icon: Timer, label: 'Pomodoro', href: '/pomodoro', translationKey: 'pomodoro' },
-  { icon: Moon, label: 'Habits', href: '/habits', translationKey: 'habits' },
-  { icon: PenTool, label: 'Notes', href: '/notes', translationKey: 'notes' },
-];
-
-const toolsItems: SidebarItem[] = [
-  { icon: Key, label: 'Password Gen', href: '/password-generator', translationKey: 'passwordGen' },
-  { icon: Palette, label: 'Gradient Gen', href: '/gradient-generator', translationKey: 'gradientGen' },
-  { icon: Percent, label: 'Tip Calc', href: '/tip-calculator', translationKey: 'tipCalc' },
-  { icon: HomeIcon, label: 'Mortgage Calc', href: '/mortgage-calculator', translationKey: 'mortgageCalc' },
-];
-
-const bottomItems: SidebarItem[] = [
-  { icon: Bookmark, label: 'Saved', href: '/saved', translationKey: 'saved' },
-  { icon: Settings, label: 'Settings', href: '/settings', translationKey: 'settings' },
-];
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -104,16 +29,10 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { lang } = useLanguage();
 
-  // Close mobile sidebar on route change
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
 
-  // Close on escape key
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMobileOpen(false);
-    };
+    const handleEscape = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileOpen(false); };
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, []);
@@ -144,13 +63,14 @@ export default function Sidebar() {
 
       <aside
         className={cn(
-          'fixed top-0 left-0 z-40 h-screen glass-strong border-r border-white/5 transition-all duration-300 flex flex-col overflow-hidden',
+          'fixed top-0 left-0 z-40 h-screen glass-premium border-r border-white/5 transition-all duration-300 flex flex-col overflow-hidden',
           sidebarCollapsed ? 'w-[76px]' : 'w-[264px]',
           'max-lg:fixed max-lg:w-[288px]',
           mobileOpen ? 'max-lg:translate-x-0' : 'max-lg:-translate-x-full'
         )}
+        role="navigation"
+        aria-label="Sidebar navigation"
       >
-        {/* Aurora gradient strip on the right edge */}
         <div className="absolute top-0 right-0 bottom-0 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none" />
         <div className="absolute -top-32 -left-32 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-32 -right-20 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -163,11 +83,7 @@ export default function Sidebar() {
             <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-amber-300 animate-breathe" />
           </div>
           {!sidebarCollapsed && (
-            <motion.div
-              initial={{ opacity: 0, x: -6 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex-1 min-w-0"
-            >
+            <motion.div initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} className="flex-1 min-w-0">
               <div className="font-semibold text-[15px] tracking-tight text-pretty">
                 <span className="text-foreground/90">Knowledge</span>{' '}
                 <span className="text-gradient">Base</span>
@@ -180,6 +96,7 @@ export default function Sidebar() {
             size="icon"
             className="ml-auto hidden lg:flex h-7 w-7 text-muted-foreground/60 hover:text-foreground hover:bg-white/5 rounded-md"
             onClick={toggleSidebar}
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {sidebarCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
           </Button>
@@ -203,12 +120,13 @@ export default function Sidebar() {
 
         {!sidebarCollapsed && (
           <div className="relative p-3 border-t border-white/5">
-            <div className="rounded-xl p-3 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/5 border border-white/5">
-              <div className="flex items-center gap-2 mb-1.5">
+            <div className="rounded-xl p-3 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/5 border border-white/5 relative overflow-hidden">
+              <div className="absolute inset-0 mesh-gradient opacity-30 pointer-events-none" />
+              <div className="relative flex items-center gap-2 mb-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                 <span className="text-[11px] font-semibold text-foreground/90">Pro Tip</span>
               </div>
-              <p className="text-[10.5px] leading-relaxed text-muted-foreground">
+              <p className="relative text-[10.5px] leading-relaxed text-muted-foreground">
                 Press{' '}
                 <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-foreground/90 font-mono text-[9px] border border-white/10">⌘K</kbd>{' '}
                 to instantly jump anywhere.
@@ -221,25 +139,45 @@ export default function Sidebar() {
   );
 }
 
-function SidebarSection({ items, pathname, collapsed, label }: { items: SidebarItem[]; pathname: string; collapsed: boolean; label: string }) {
+function SidebarSection({ items, pathname, collapsed, label }: { items: NavItem[]; pathname: string; collapsed: boolean; label: string }) {
+  const [isOpen, setIsOpen] = useState(true);
+
   return (
     <div className="mb-3">
       {!collapsed && (
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/50 px-3 mb-2">{label}</p>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/50 hover:text-foreground/80 px-3 mb-2 transition-colors cursor-pointer"
+          aria-expanded={isOpen}
+        >
+          {label}
+          <ChevronDown className={cn("w-3 h-3 transition-transform duration-300", isOpen ? "" : "-rotate-90")} />
+        </button>
       )}
-      <div className="space-y-0.5">
-        {items.map((item) => (
-          <SidebarItemComponent key={item.href} item={item} pathname={pathname} collapsed={collapsed} />
-        ))}
-      </div>
+      
+      <AnimatePresence initial={false}>
+        {(isOpen || collapsed) && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-0.5 overflow-hidden"
+          >
+            {items.map((item) => (
+              <SidebarItemComponent key={item.href} item={item} pathname={pathname} collapsed={collapsed} />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-function SidebarItemComponent({ item, pathname, collapsed }: { item: SidebarItem; pathname: string; collapsed: boolean }) {
+function SidebarItemComponent({ item, pathname, collapsed }: { item: NavItem; pathname: string; collapsed: boolean }) {
   const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
   const { t } = useLanguage();
-  const displayLabel = t.nav[item.translationKey] || item.label;
+  const displayLabel = t.nav[item.translationKey as keyof typeof t.nav] || item.label;
 
   const link = (
     <Link
@@ -250,6 +188,7 @@ function SidebarItemComponent({ item, pathname, collapsed }: { item: SidebarItem
           ? 'bg-gradient-to-r from-blue-500/15 via-purple-500/10 to-transparent text-foreground'
           : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.04]'
       )}
+      aria-current={isActive ? 'page' : undefined}
     >
       {isActive && (
         <motion.span
@@ -271,7 +210,12 @@ function SidebarItemComponent({ item, pathname, collapsed }: { item: SidebarItem
           {displayLabel}
         </span>
       )}
-      {isActive && !collapsed && (
+      {item.badge && !collapsed && (
+        <span className="ml-auto px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+          {item.badge}
+        </span>
+      )}
+      {isActive && !collapsed && !item.badge && (
         <span className="ml-auto w-1 h-1 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
       )}
     </Link>

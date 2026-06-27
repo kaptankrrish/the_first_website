@@ -8,7 +8,7 @@ import {
   Sparkles, ArrowUpRight, ArrowDownRight,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PageHeader } from '@/components/layout/page-header';
+import { PageWrapper } from '@/components/layout/page-wrapper';
 import { BentoCard } from '@/components/ui/bento-card';
 import { Badge } from '@/components/ui/badge';
 import { useTodoStore, useHabitStore, useNoteStore, usePomodoroStore, useNewsStore, useRecentlyUsedStore } from '@/store';
@@ -102,20 +102,19 @@ export default function AnalyticsPage() {
     { name: 'News', icon: Newspaper, count: articles.length, color: 'text-blue-300' },
     { name: 'Notes', icon: PenTool, count: notes.length, color: 'text-amber-300' },
     { name: 'Pomodoro', icon: Timer, count: sessionsCompleted, color: 'text-emerald-300' },
-    { name: 'Weather', icon: Cloud, count: 12, color: 'text-cyan-300' },
-    { name: 'Crypto', icon: DollarSign, count: 8, color: 'text-purple-300' },
-    { name: 'Movies', icon: Film, count: 5, color: 'text-pink-300' },
-  ], [articles.length, notes.length, sessionsCompleted]);
+    { name: 'Todos', icon: CheckSquare, count: todos.length, color: 'text-cyan-300' },
+    { name: 'Habits', icon: BookOpen, count: habits.length, color: 'text-purple-300' },
+    { name: 'Recent', icon: Sparkles, count: recentItems.length, color: 'text-pink-300' },
+  ], [articles.length, notes.length, sessionsCompleted, todos.length, habits.length, recentItems.length]);
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      <PageHeader
-        title={t.nav.analytics || 'Analytics'}
-        description="Track your productivity, learning progress, and usage insights"
-        icon={BarChart3}
-        badge="Personal"
-      />
-
+    <PageWrapper
+      title={t.nav.analytics || 'Analytics'}
+      subtitle="Track your productivity, learning progress, and usage insights"
+      icon={BarChart3}
+      badgeText="Personal"
+      colorScheme="cyan"
+    >
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -353,6 +352,6 @@ export default function AnalyticsPage() {
           </Card>
         </motion.div>
       </motion.div>
-    </div>
+    </PageWrapper>
   );
 }

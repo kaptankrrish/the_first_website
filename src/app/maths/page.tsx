@@ -13,11 +13,10 @@ import {
   Sparkles,
   Hash,
   Quote,
-  Clock as ClockIcon,
   RefreshCw,
 } from 'lucide-react';
 
-import { LiveClock } from '@/components/ui/live-clock';
+import { PageWrapper } from '@/components/layout/page-wrapper';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { MathFact } from '@/services/maths';
 
@@ -69,47 +68,14 @@ export default function MathsPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <PageWrapper
+      icon={Sigma}
+      title={t.nav.maths}
+      subtitle="Mathematical properties and number theory explored via Numbers API."
+      badgeText="Number Theory"
+      colorScheme="amber"
+    >
       <div className="space-y-8">
-        <div className="relative overflow-hidden">
-          <div className="absolute -top-20 -left-20 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative flex items-start gap-3 sm:gap-4 min-w-0">
-            <motion.div
-              initial={{ scale: 0.5, rotate: -10, opacity: 0 }}
-              animate={{ scale: 1, rotate: 0, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 20 }}
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-orange-500/20 via-amber-500/20 to-rose-500/20 border border-white/10 flex items-center justify-center shrink-0 shadow-[0_0_24px_rgba(249,115,22,0.2)]"
-            >
-              <Sigma className="w-5 h-5 sm:w-6 sm:h-6 text-orange-200" />
-            </motion.div>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <span className="px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-300 text-[10px] font-semibold uppercase tracking-[0.18em] border border-orange-400/20 inline-flex items-center gap-1.5">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-orange-400 shadow-[0_0_6px_rgba(251,146,60,0.8)]" />
-                  </span>
-                  Number Theory
-                </span>
-                <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60 font-semibold inline-flex items-center gap-1.5">
-                  <ClockIcon className="h-3 w-3 text-orange-400" />
-                  <LiveClock />
-                </span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient-warm leading-tight text-balance">
-                {t.nav.maths}
-              </h1>
-              <p className="text-sm text-muted-foreground/80 mt-1.5 max-w-2xl text-pretty">
-                Mathematical properties and number theory explored via Numbers API.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 h-px divider-gradient" />
-        </div>
-
         {status === 'pending' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 9 }).map((_, i) => (
@@ -124,17 +90,18 @@ export default function MathsPage() {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {visibleFacts.map((fact: MathFact) => (
-              <motion.div key={fact.id} variants={cardVariants}>
-                <Card className="group relative h-full overflow-hidden border-white/5 bg-white/[0.03] backdrop-blur-xl transition-all duration-300 hover:border-white/20 hover:bg-white/[0.06] hover:shadow-xl hover:shadow-indigo-500/5">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <Infinity className="w-16 h-16 text-indigo-400" />
+              <motion.div key={fact.id} variants={cardVariants} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                <Card className="group relative h-full overflow-hidden border-white/10 bg-white/[0.03] backdrop-blur-xl transition-all duration-300 hover:border-amber-500/40 hover:bg-white/[0.06] hover:shadow-2xl hover:shadow-amber-500/10">
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-amber-500/0 to-amber-500/0 group-hover:from-amber-500/5 group-hover:via-amber-500/0 transition-all duration-500" />
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 group-hover:rotate-12 transition-all duration-500">
+                    <Infinity className="w-16 h-16 text-amber-400" />
                   </div>
                   <CardHeader>
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+                      <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 group-hover:bg-amber-500/20 transition-colors">
                         <Hash className="w-4 h-4" />
                       </div>
-                      <Badge variant="outline" className="text-xs border-indigo-500/30 text-indigo-300">
+                      <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-300 bg-amber-500/5">
                         Number {fact.number}
                       </Badge>
                     </div>
@@ -150,7 +117,10 @@ export default function MathsPage() {
                       <span className="text-[10px] text-white/20 uppercase tracking-widest font-bold">
                         Mathematical Property
                       </span>
-                      <Sparkles className="w-3 h-3 text-amber-400/40" />
+                      <div className="relative">
+                        <Sparkles className="w-3 h-3 text-amber-400/40 group-hover:text-amber-400 transition-colors" />
+                        <div className="absolute inset-0 group-hover:animate-ping opacity-0 group-hover:opacity-100 bg-amber-400/20 rounded-full" />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -169,7 +139,7 @@ export default function MathsPage() {
                  className="text-white/60 hover:text-white hover:bg-white/5 gap-2"
               >
                  {isFetchingNextPage ? (
-                   <RefreshCw className="h-4 w-4 animate-spin text-indigo-400" />
+                   <RefreshCw className="h-4 w-4 animate-spin text-amber-400" />
                  ) : (
                    <RefreshCw className="h-4 w-4" />
                  )}
@@ -181,6 +151,6 @@ export default function MathsPage() {
          </div>
         )}
       </div>
-    </div>
+    </PageWrapper>
   );
 }

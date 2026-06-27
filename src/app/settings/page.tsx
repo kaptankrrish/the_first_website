@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Settings, Sun, Type, Bell, Trash2, Info, Languages, Monitor, Sparkles, Keyboard, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -110,6 +111,7 @@ const LOCALIZED_TEXTS = {
 
 export default function SettingsPage() {
   const { lang, setLang, t } = useLanguage();
+  const router = useRouter();
   const settings = useAppStore((s) => s.settings);
   const updateSettings = useAppStore((s) => s.updateSettings);
   const sidebarCollapsed = useAppStore((s) => s.sidebarCollapsed);
@@ -127,8 +129,7 @@ export default function SettingsPage() {
 
   const handleReplayTour = () => {
     resetTour();
-    // Navigate to home where the tour will appear
-    window.location.href = '/';
+    router.push('/');
   };
 
   const localTexts = LOCALIZED_TEXTS[lang] || LOCALIZED_TEXTS.en;

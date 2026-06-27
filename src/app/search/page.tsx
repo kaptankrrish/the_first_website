@@ -2,13 +2,14 @@
 
 import { Suspense, useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { Search, FileText, Newspaper, BookOpen, Film, Bitcoin, Cloud, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/utils/cn';
 import { useNewsStore, useNoteStore } from '@/store';
 import { vedicContent } from '@/content/vedic';
 import { searchMovies } from '@/services/movies';
@@ -18,15 +19,16 @@ import type { Quote, Movie, CryptoCoin, City } from '@/types';
 
 import { fetchQuotes } from '@/services/quotes';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PageWrapper } from '@/components/layout/page-wrapper';
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.05, delayChildren: 0.1 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 100, damping: 15 } },
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 80, damping: 15 } },
 };
 
 function highlightText(text: string, query: string) {
@@ -34,7 +36,7 @@ function highlightText(text: string, query: string) {
   const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
   const parts = text.split(regex);
   return parts.map((part, i) =>
-    regex.test(part) ? <mark key={i} className="bg-blue-500/30 text-white rounded px-0.5">{part}</mark> : part
+    regex.test(part) ? <mark key={i} className="bg-slate-500/40 text-white rounded px-1 py-0.5 shadow-sm shadow-slate-500/20">{part}</mark> : part
   );
 }
 
@@ -62,6 +64,7 @@ function SearchContent() {
   const [coins, setCoins] = useState<CryptoCoin[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [isSearchingExternal, setIsSearchingExternal] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(query), 300);
@@ -142,312 +145,230 @@ function SearchContent() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="max-w-3xl mx-auto"
+      className="max-w-4xl mx-auto space-y-8"
     >
-      <div className="relative overflow-hidden mb-6">
-        <div className="absolute -top-20 -left-20 w-80 h-80 bg-slate-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-zinc-500/10 rounded-full blur-3xl pointer-events-none" />
+      <PageWrapper
+        icon={Search}
+        title={t.nav.search}
+        subtitle="Search across articles, notes, vedic texts, and more"
+        badgeText="Global Search"
+        colorScheme="slate"
+      />
 
-        <div className="relative flex items-start gap-3 sm:gap-4 min-w-0">
-          <motion.div
-            initial={{ scale: 0.5, rotate: -10, opacity: 0 }}
-            animate={{ scale: 1, rotate: 0, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 20 }}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-slate-500/20 via-zinc-500/20 to-gray-500/20 border border-white/10 flex items-center justify-center shrink-0 shadow-[0_0_24px_rgba(148,163,184,0.2)]"
-          >
-            <Search className="w-5 h-5 sm:w-6 sm:h-6 text-slate-200" />
-          </motion.div>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2 mb-1.5">
-              <span className="px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-300 text-[10px] font-semibold uppercase tracking-[0.18em] border border-slate-400/20 inline-flex items-center gap-1.5">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-slate-400 opacity-75" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-slate-400 shadow-[0_0_6px_rgba(148,163,184,0.8)]" />
-                </span>
-                Global Search
-              </span>
-              <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60 font-semibold">
-                ⌘K
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient leading-tight text-balance">
-              {t.nav.search}
-            </h1>
-            <p className="text-sm text-muted-foreground/80 mt-1.5 max-w-2xl text-pretty">
-              Search across articles, notes, vedic texts, and quotes
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-5 h-px divider-gradient" />
-      </div>
-
-      <motion.div variants={itemVariants} className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
+      <motion.div variants={itemVariants} className="relative z-20">
+        <div className={cn(
+          "relative transition-all duration-500 rounded-2xl",
+          isFocused ? "shadow-[0_0_40px_rgba(148,163,184,0.2)] scale-[1.01]" : "shadow-none scale-100"
+        )}>
+          <Search className={cn(
+            "absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors duration-300",
+            isFocused ? "text-slate-300" : "text-white/40"
+          )} />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             placeholder={t.common.search}
-            className="pl-10 h-14 text-lg"
+            className={cn(
+              "pl-12 h-16 text-lg rounded-2xl border-2 transition-all duration-300",
+              isFocused 
+                ? "bg-slate-900/80 border-slate-500/50 text-white placeholder:text-white/40" 
+                : "bg-white/5 border-white/10 text-white/90 placeholder:text-white/30 hover:bg-white/10"
+            )}
             autoFocus
           />
+          {query && (
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+              <button 
+                onClick={() => setQuery('')}
+                className="text-white/40 hover:text-white/80 p-1 rounded-full hover:bg-white/10 transition-colors text-xs font-medium"
+              >
+                Clear
+              </button>
+            </div>
+          )}
         </div>
       </motion.div>
 
-      {debouncedQuery && (
-        <motion.div variants={itemVariants} className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <p className="text-sm text-white/40">
-            {t.common.search}: <span className="text-white font-semibold">{totalResults}</span> result{totalResults !== 1 ? 's' : ''} for &ldquo;{debouncedQuery}&rdquo;
-          </p>
-          <a
-            href={`https://www.google.com/search?q=${encodeURIComponent(debouncedQuery)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 transition-colors border border-blue-500/30 text-sm font-medium w-full sm:w-auto"
+      <AnimatePresence mode="wait">
+        {debouncedQuery && (
+          <motion.div
+            key="results-header"
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2 border-b border-white/5"
           >
-            <Search className="h-4 w-4" />
-            Search on Google
-          </a>
-        </motion.div>
-      )}
+            <p className="text-sm text-white/60">
+              <span className="text-white font-semibold text-base">{totalResults}</span> result{totalResults !== 1 ? 's' : ''} for &ldquo;<span className="text-white">{debouncedQuery}</span>&rdquo;
+            </p>
+            <a
+              href={`https://www.google.com/search?q=${encodeURIComponent(debouncedQuery)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 transition-colors border border-blue-500/20 text-sm font-medium w-full sm:w-auto shadow-sm shadow-blue-500/10"
+            >
+              <Search className="h-4 w-4" />
+              Search Web
+            </a>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {debouncedQuery && totalResults === 0 && !isSearchingExternal && (
-        <motion.div variants={itemVariants}>
-          <Card className="text-center py-12">
-            <CardContent>
-              <Search className="h-12 w-12 mx-auto mb-4 text-white/20" />
-              <h3 className="text-lg font-semibold text-white mb-2">{t.common.noResults}</h3>
-              <p className="text-sm text-white/40 max-w-sm mx-auto">
-                Try adjusting your search query or browse different categories
+      <div className="min-h-[400px]">
+        <AnimatePresence mode="wait">
+          {debouncedQuery && totalResults === 0 && !isSearchingExternal ? (
+            <motion.div
+              key="no-results"
+              variants={itemVariants}
+              initial="hidden"
+              animate="visible"
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="flex flex-col items-center justify-center py-24 text-center"
+            >
+              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
+                <Search className="h-8 w-8 text-white/20" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">{t.common.noResults}</h3>
+              <p className="text-sm text-white/40 max-w-sm">
+                Try adjusting your search query or check for typos
               </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-      
-      {isSearchingExternal && (
-        <motion.div variants={itemVariants} className="flex justify-center my-6">
-          <div className="flex items-center gap-2 text-white/50">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            <span className="text-sm">Searching external sources...</span>
-          </div>
-        </motion.div>
-      )}
-
-      {!debouncedQuery && (
-        <motion.div variants={itemVariants}>
-          <Card className="text-center py-12">
-            <CardContent>
-              <Search className="h-12 w-12 mx-auto mb-4 text-white/20" />
-              <h3 className="text-lg font-semibold text-white mb-2">{t.common.search}</h3>
-              <p className="text-sm text-white/40 max-w-sm mx-auto">
-                Type a query above to search across articles, notes, vedic texts, and more
+            </motion.div>
+          ) : !debouncedQuery ? (
+            <motion.div
+              key="initial"
+              variants={itemVariants}
+              initial="hidden"
+              animate="visible"
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="flex flex-col items-center justify-center py-24 text-center"
+            >
+              <div className="relative w-24 h-24 mb-8">
+                <div className="absolute inset-0 bg-slate-500/20 rounded-full blur-xl animate-pulse" />
+                <div className="relative w-full h-full bg-slate-900/50 border border-slate-500/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <Search className="h-8 w-8 text-slate-400" />
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">Search Everything</h3>
+              <p className="text-sm text-white/40 max-w-sm leading-relaxed">
+                Type a query above to search across articles, notes, vedic texts, movies, crypto, and weather.
               </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="results-grid"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-10"
+            >
+              {isSearchingExternal && (
+                <motion.div variants={itemVariants} className="flex justify-center mb-6">
+                  <Badge variant="outline" className="gap-2 px-3 py-1.5 border-slate-500/30 bg-slate-500/10 text-slate-300">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Searching external sources...
+                  </Badge>
+                </motion.div>
+              )}
 
-      {results.articles.length > 0 && (
-        <motion.div variants={itemVariants} className="mb-6">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-3">
-            <Newspaper className="h-5 w-5 text-blue-400" />
-            {t.nav.news} ({results.articles.length})
-          </h2>
-          <div className="space-y-2">
-            {results.articles.map((a) => (
-              <Link key={a.id} href={`/news`}>
-                <Card className="transition-all duration-200 hover:border-blue-500/30 hover:translate-x-1 cursor-pointer">
-                  <CardContent className="p-4 flex items-start gap-3">
-                    <Newspaper className="h-5 w-5 text-blue-400 mt-0.5 shrink-0" />
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-white truncate">{highlightText(a.title, debouncedQuery)}</div>
-                      <div className="text-xs text-white/50 line-clamp-1 mt-0.5">{highlightText(a.description, debouncedQuery)}</div>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{a.category}</Badge>
-                        <span className="text-[10px] text-white/30">{a.source}</span>
+              {/* Categories */}
+              {[
+                { data: results.articles, title: t.nav.news, icon: Newspaper, color: 'blue', link: '/news' },
+                { data: results.notes, title: t.nav.notes, icon: FileText, color: 'amber', link: '/notes' },
+                { data: results.vedic, title: 'Vedic Texts', icon: BookOpen, color: 'purple', link: '/vedic-learning' },
+                { data: results.quotes, title: t.quotes.title, icon: BookOpen, color: 'pink', link: '/quotes' },
+                { data: movies, title: t.nav.movies, icon: Film, color: 'indigo', link: (id: string) => `/movies/${id}` },
+                { data: coins, title: t.nav.crypto, icon: Bitcoin, color: 'yellow', link: (id: string) => `/crypto/${id}` },
+                { data: cities, title: t.nav.weather, icon: Cloud, color: 'cyan', link: (id: string, item: any) => `/weather?lat=${item.lat}&lon=${item.lon}&name=${encodeURIComponent(item.name)}` },
+              ].map((category, idx) => {
+                if (!category.data.length) return null;
+                const Icon = category.icon;
+                
+                return (
+                  <motion.div key={category.title} variants={containerVariants} className="space-y-4">
+                    <div className="flex items-center gap-2 pb-2 border-b border-white/5">
+                      <div className={`p-1.5 rounded-md bg-${category.color}-500/20`}>
+                        <Icon className={`h-4 w-4 text-${category.color}-400`} />
                       </div>
+                      <h2 className="text-lg font-semibold text-white">
+                        {category.title}
+                      </h2>
+                      <Badge variant="secondary" className="ml-2 text-[10px]">
+                        {category.data.length}
+                      </Badge>
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </motion.div>
-      )}
+                    
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {category.data.map((item: any, i) => {
+                        // Extract common properties for rendering
+                        const title = item.title || item.text || item.name;
+                        const desc = item.description || item.content || item.explanation || item.author || item.overview || item.country || '';
+                        const badge1 = item.category || item.folder || item.source || new Date(item.releaseDate).getFullYear() || item.symbol || '';
+                        const badge2 = item.source || item.lat?.toFixed(2) || '';
+                        
+                        const href = typeof category.link === 'function' ? category.link(item.id, item) : category.link;
 
-      {results.notes.length > 0 && (
-        <motion.div variants={itemVariants} className="mb-6">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-3">
-            <FileText className="h-5 w-5 text-amber-400" />
-            {t.nav.notes} ({results.notes.length})
-          </h2>
-          <div className="space-y-2">
-            {results.notes.map((n) => (
-              <Link key={n.id} href={`/notes`}>
-                <Card className="transition-all duration-200 hover:border-amber-500/30 hover:translate-x-1 cursor-pointer">
-                  <CardContent className="p-4 flex items-start gap-3">
-                    <FileText className="h-5 w-5 text-amber-400 mt-0.5 shrink-0" />
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-white truncate">{highlightText(n.title, debouncedQuery)}</div>
-                      <div className="text-xs text-white/50 line-clamp-1 mt-0.5">{highlightText(n.content, debouncedQuery)}</div>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{n.folder}</Badge>
-                      </div>
+                        return (
+                          <motion.div key={item.id || i} variants={itemVariants}>
+                            <Link href={href}>
+                              <Card className={`group h-full transition-all duration-300 hover:border-${category.color}-500/40 hover:bg-white/5 bg-white/[0.02] border-white/5 hover:shadow-lg hover:shadow-${category.color}-500/5 hover:-translate-y-0.5`}>
+                                <CardContent className="p-4 flex items-start gap-3 h-full">
+                                  <div className="min-w-0 flex-1 flex flex-col h-full">
+                                    <div className="text-sm font-medium text-white/90 group-hover:text-white transition-colors mb-1">
+                                      {highlightText(title, debouncedQuery)}
+                                    </div>
+                                    {desc && (
+                                      <div className="text-xs text-white/50 line-clamp-2 mb-3 flex-1 leading-relaxed">
+                                        {highlightText(desc, debouncedQuery)}
+                                      </div>
+                                    )}
+                                    <div className="flex items-center gap-2 mt-auto pt-2 border-t border-white/5">
+                                      {badge1 && (
+                                        <Badge variant="outline" className={`text-[9px] px-1.5 py-0 border-${category.color}-500/20 text-${category.color}-300/80 bg-${category.color}-500/10`}>
+                                          {typeof badge1 === 'string' ? highlightText(badge1, debouncedQuery) : badge1}
+                                        </Badge>
+                                      )}
+                                      {badge2 && typeof badge2 === 'string' && (
+                                        <span className="text-[10px] text-white/30 truncate">
+                                          {badge2}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </Link>
+                          </motion.div>
+                        );
+                      })}
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {results.vedic.length > 0 && (
-        <motion.div variants={itemVariants} className="mb-6">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-3">
-            <BookOpen className="h-5 w-5 text-purple-400" />
-            Vedic Texts ({results.vedic.length})
-          </h2>
-          <div className="space-y-2">
-            {results.vedic.map((v) => (
-              <Link key={v.id} href={`/vedic-learning`}>
-                <Card className="transition-all duration-200 hover:border-purple-500/30 hover:translate-x-1 cursor-pointer">
-                  <CardContent className="p-4 flex items-start gap-3">
-                    <BookOpen className="h-5 w-5 text-purple-400 mt-0.5 shrink-0" />
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-white truncate">{highlightText(v.title, debouncedQuery)}</div>
-                      <div className="text-xs text-white/50 line-clamp-1 mt-0.5">{highlightText(v.explanation, debouncedQuery)}</div>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{v.source}</Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {results.quotes.length > 0 && (
-        <motion.div variants={itemVariants} className="mb-6">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-3">
-            <BookOpen className="h-5 w-5 text-pink-400" />
-            {t.quotes.title} ({results.quotes.length})
-          </h2>
-          <div className="space-y-2">
-            {results.quotes.map((qt) => (
-              <Link key={qt.id} href="/quotes">
-                <Card className="transition-all duration-200 hover:border-pink-500/30 hover:translate-x-1 cursor-pointer">
-                  <CardContent className="p-4 flex items-start gap-3">
-                    <BookOpen className="h-5 w-5 text-pink-400 mt-0.5 shrink-0" />
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-white">{highlightText(qt.text, debouncedQuery)}</div>
-                      <div className="text-xs text-white/50 mt-0.5">&mdash; {highlightText(qt.author, debouncedQuery)}</div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {movies.length > 0 && (
-        <motion.div variants={itemVariants} className="mb-6">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-3">
-            <Film className="h-5 w-5 text-indigo-400" />
-            {t.nav.movies} ({movies.length})
-          </h2>
-          <div className="space-y-2">
-            {movies.map((m) => (
-              <Link key={m.id} href={`/movies/${m.id}`}>
-                <Card className="transition-all duration-200 hover:border-indigo-500/30 hover:translate-x-1 cursor-pointer">
-                  <CardContent className="p-4 flex items-start gap-3">
-                    <Film className="h-5 w-5 text-indigo-400 mt-0.5 shrink-0" />
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-white">{highlightText(m.title, debouncedQuery)}</div>
-                      <div className="text-xs text-white/50 line-clamp-1 mt-0.5">{highlightText(m.overview, debouncedQuery)}</div>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{new Date(m.releaseDate).getFullYear() || 'Unknown'}</Badge>
-                        <span className="text-[10px] text-white/30">{t.movies.rating}: {m.voteAverage.toFixed(1)}/10</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {coins.length > 0 && (
-        <motion.div variants={itemVariants} className="mb-6">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-3">
-            <Bitcoin className="h-5 w-5 text-yellow-500" />
-            {t.nav.crypto} ({coins.length})
-          </h2>
-          <div className="space-y-2">
-            {coins.map((c) => (
-              <Link key={c.id} href={`/crypto/${c.id}`}>
-                <Card className="transition-all duration-200 hover:border-yellow-500/30 hover:translate-x-1 cursor-pointer">
-                  <CardContent className="p-4 flex items-start gap-3">
-                    <Bitcoin className="h-5 w-5 text-yellow-500 mt-0.5 shrink-0" />
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-white">{highlightText(c.name, debouncedQuery)}</div>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{highlightText(c.symbol, debouncedQuery)}</Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {cities.length > 0 && (
-        <motion.div variants={itemVariants} className="mb-6">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-3">
-            <Cloud className="h-5 w-5 text-cyan-400" />
-            {t.nav.weather} ({cities.length})
-          </h2>
-          <div className="space-y-2">
-            {cities.map((city, idx) => (
-              <Link key={idx} href={`/weather?lat=${city.lat}&lon=${city.lon}&name=${encodeURIComponent(city.name)}`}>
-                <Card className="transition-all duration-200 hover:border-cyan-500/30 hover:translate-x-1 cursor-pointer">
-                  <CardContent className="p-4 flex items-start gap-3">
-                    <Cloud className="h-5 w-5 text-cyan-400 mt-0.5 shrink-0" />
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-white">{highlightText(city.name, debouncedQuery)}</div>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{highlightText(city.country, debouncedQuery)}</Badge>
-                        <span className="text-[10px] text-white/30">{city.lat.toFixed(2)}, {city.lon.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </motion.div>
-      )}
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </motion.div>
   );
 }
 
 function SearchFallback() {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Skeleton className="h-10 w-full rounded-xl" />
+    <div className="max-w-4xl mx-auto space-y-8">
+      <div className="flex items-center gap-4 py-8">
+        <Skeleton className="h-16 w-16 rounded-2xl" />
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-96" />
+        </div>
       </div>
-      <div className="grid gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-24 rounded-xl" />
+      <Skeleton className="h-16 w-full rounded-2xl" />
+      <div className="grid sm:grid-cols-2 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-32 rounded-xl" />
         ))}
       </div>
     </div>

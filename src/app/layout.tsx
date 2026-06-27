@@ -12,14 +12,33 @@ import { OnboardingTour } from '@/components/features/onboarding-tour';
 import { KeyboardShortcutsOverlay } from '@/components/features/keyboard-shortcuts';
 import { SidebarCollapseBridge } from '@/components/layout/sidebar-collapse-bridge';
 import { BackToTop } from '@/components/ui/back-to-top';
+import { PageTransition } from '@/components/ui/page-transition';
+import { FocusManager } from '@/components/features/focus-manager';
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'AI Knowledge Ecosystem',
-    description: 'A futuristic AI-powered knowledge platform combining news, learning, productivity, and insights.',
+    title: 'AI Knowledge Ecosystem | Infinite Knowledge Base',
+    description: 'A futuristic AI-powered knowledge platform combining real-time news, learning modules, productivity tools, crypto tracking, weather, and Vedic wisdom.',
+    keywords: ['AI', 'knowledge', 'news', 'learning', 'productivity', 'crypto', 'weather', 'vedic', 'ecosystem'],
+    authors: [{ name: 'AI Knowledge Ecosystem' }],
+    openGraph: {
+      title: 'AI Knowledge Ecosystem',
+      description: 'A futuristic AI-powered knowledge platform combining real-time news, learning modules, productivity tools, crypto tracking, weather, and Vedic wisdom.',
+      type: 'website',
+      siteName: 'AI Knowledge Ecosystem',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'AI Knowledge Ecosystem',
+      description: 'A futuristic AI-powered knowledge platform combining real-time news, learning modules, productivity tools, crypto tracking, weather, and Vedic wisdom.',
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
   };
 }
 
@@ -38,11 +57,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8234588609544093"
-          crossOrigin="anonymous"
-        ></script>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#6366f1" />
+        {process.env.NEXT_PUBLIC_ADSENSE_ID && (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_ID}`}
+            crossOrigin="anonymous"
+          />
+        )}
       </head>
       <body className="min-h-full">
         <Providers>
@@ -53,7 +76,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="lg:pl-[264px] min-h-screen relative z-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 lg:pb-6 safe-area-top">
               <GlobalHeader />
-              {children}
+              <PageTransition>
+                {children}
+              </PageTransition>
             </div>
           </main>
           <MobileNav />
@@ -61,6 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <OnboardingTour />
           <KeyboardShortcutsOverlay />
           <SidebarCollapseBridge />
+          <FocusManager />
         </Providers>
       </body>
     </html>

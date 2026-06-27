@@ -15,12 +15,11 @@ import {
   ExternalLink,
   Scale,
   Zap,
-  Clock as ClockIcon,
   RefreshCw,
   Box,
 } from 'lucide-react';
 
-import { LiveClock } from '@/components/ui/live-clock';
+import { PageWrapper } from '@/components/layout/page-wrapper';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { Compound } from '@/types';
 
@@ -68,8 +67,8 @@ export default function ChemistryPage() {
   };
 
   const cardVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 100, damping: 15 } },
+    hidden: { opacity: 0, y: 30, scale: 0.95 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring' as const, stiffness: 100, damping: 15 } },
   };
 
   const contentVariants = {
@@ -78,48 +77,15 @@ export default function ChemistryPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <PageWrapper
+      icon={FlaskConical}
+      title={t.nav.chemistry}
+      subtitle="Molecular data explored via PubChem PUG REST API."
+      badgeText="PubChem"
+      colorScheme="emerald"
+    >
       <div className="flex gap-6">
         <div className="flex-1 space-y-8">
-          <div className="relative overflow-hidden">
-            <div className="absolute -top-20 -left-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-green-500/10 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="relative flex items-start gap-3 sm:gap-4 min-w-0">
-              <motion.div
-                initial={{ scale: 0.5, rotate: -10, opacity: 0 }}
-                animate={{ scale: 1, rotate: 0, opacity: 1 }}
-                transition={{ type: 'spring', stiffness: 380, damping: 20 }}
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-emerald-500/20 via-green-500/20 to-teal-500/20 border border-white/10 flex items-center justify-center shrink-0 shadow-[0_0_24px_rgba(16,185,129,0.2)]"
-              >
-                <FlaskConical className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-200" />
-              </motion.div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-semibold uppercase tracking-[0.18em] border border-emerald-400/20 inline-flex items-center gap-1.5">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
-                    </span>
-                    PubChem
-                  </span>
-                  <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60 font-semibold inline-flex items-center gap-1.5">
-                    <ClockIcon className="h-3 w-3 text-emerald-400" />
-                    <LiveClock />
-                  </span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient leading-tight text-balance">
-                  {t.nav.chemistry}
-                </h1>
-                <p className="text-sm text-muted-foreground/80 mt-1.5 max-w-2xl text-pretty">
-                  Molecular data explored via PubChem PUG REST API.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-5 h-px divider-gradient" />
-          </div>
-
           {status === 'pending' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {Array.from({ length: 9 }).map((_, i) => (
@@ -137,11 +103,17 @@ export default function ChemistryPage() {
                 const isExpanded = expandedTopic === compound.id;
 
                 return (
-                  <motion.div key={compound.id} variants={cardVariants} layout>
+                  <motion.div 
+                    key={compound.id} 
+                    variants={cardVariants} 
+                    layout
+                    whileHover={{ scale: 1.02, rotate: 1 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
                     <Card
                       className={cn(
-                        'group cursor-pointer overflow-hidden transition-all duration-300 border-white/5 hover:border-white/20 hover:shadow-xl hover:shadow-blue-500/5',
-                        isExpanded && 'border-blue-500/30 shadow-lg shadow-blue-500/10'
+                        'group cursor-pointer overflow-hidden transition-all duration-300 border-white/10 bg-white/[0.02] backdrop-blur-md hover:bg-white/[0.05] hover:border-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/20',
+                        isExpanded && 'border-emerald-500/50 shadow-lg shadow-emerald-500/20 bg-white/[0.05]'
                       )}
                       onClick={() =>
                         setExpandedTopic(isExpanded ? null : compound.id)
@@ -150,20 +122,20 @@ export default function ChemistryPage() {
                       <CardHeader className="relative">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
-                              <Atom className="w-5 h-5 text-blue-400" />
+                            <div className="p-2 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors">
+                              <Atom className="w-5 h-5 text-emerald-400" />
                             </div>
                             <div>
                               <CardTitle className="text-white/90 group-hover:text-white transition-colors">
                                 {compound.title}
                               </CardTitle>
-                              <CardDescription className="text-blue-400/60 font-mono text-xs">
+                              <CardDescription className="text-emerald-400/80 font-mono text-xs font-bold tracking-wider">
                                 {compound.formula}
                               </CardDescription>
                             </div>
                           </div>
                           {isExpanded ? (
-                            <ChevronUp className="w-4 h-4 text-blue-400" />
+                            <ChevronUp className="w-4 h-4 text-emerald-400" />
                           ) : (
                             <ChevronDown className="w-4 h-4 text-white/30" />
                           )}
@@ -216,7 +188,7 @@ export default function ChemistryPage() {
                                   href={compound.url} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors bg-blue-400/5 px-2.5 py-1.5 rounded-md border border-blue-400/20"
+                                  className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 transition-colors bg-emerald-400/10 px-2.5 py-1.5 rounded-md border border-emerald-400/20"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   View on PubChem <ExternalLink className="w-3 h-3" />
@@ -243,7 +215,7 @@ export default function ChemistryPage() {
                    className="text-white/60 hover:text-white hover:bg-white/5 gap-2"
                 >
                    {isFetchingNextPage ? (
-                     <RefreshCw className="h-4 w-4 animate-spin text-blue-400" />
+                     <RefreshCw className="h-4 w-4 animate-spin text-emerald-400" />
                    ) : (
                      <RefreshCw className="h-4 w-4" />
                    )}
@@ -256,6 +228,6 @@ export default function ChemistryPage() {
           )}
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

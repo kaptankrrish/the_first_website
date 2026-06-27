@@ -5,12 +5,13 @@ import { cn } from '@/utils/cn';
 
 const Card = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
+  React.HTMLAttributes<HTMLDivElement> & { premium?: boolean }
+>(({ className, premium = false, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
       'rounded-2xl glass-strong border-white/[0.06] backdrop-blur-2xl transition-all duration-300 hover:border-white/10',
+      premium && 'glass-premium card-magnetic hover:border-white/[0.12]',
       className
     )}
     {...props}

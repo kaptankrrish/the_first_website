@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Key, Copy, Check, RefreshCw, ShieldCheck } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { PageWrapper } from '@/components/layout/page-wrapper';
 import { cn } from '@/utils/cn';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -32,7 +33,7 @@ function generatePassword(length: number, opts: { upper: boolean; lower: boolean
   return password;
 }
 
-function getStrength(password: string): { label: string; color: string; variant: 'destructive' | 'warning' | 'default' | 'success' } {
+function getStrength(password: string): { label: string; color: string; variant: 'destructive' | 'warning' | 'default' | 'success'; percent: number } {
   let score = 0;
   if (password.length >= 12) score += 1;
   if (password.length >= 20) score += 1;
@@ -41,16 +42,11 @@ function getStrength(password: string): { label: string; color: string; variant:
   if (/[A-Z]/.test(password)) score += 1;
   if (/[0-9]/.test(password)) score += 1;
   if (/[^a-zA-Z0-9]/.test(password)) score += 1;
-  if (score <= 2) return { label: 'Weak', color: 'bg-red-500', variant: 'destructive' };
-  if (score <= 4) return { label: 'Medium', color: 'bg-amber-500', variant: 'warning' };
-  if (score <= 6) return { label: 'Strong', color: 'bg-emerald-500', variant: 'default' };
-  return { label: 'Very Strong', color: 'bg-emerald-400', variant: 'success' };
+  if (score <= 2) return { label: 'Weak', color: 'from-red-500 to-red-400', variant: 'destructive', percent: 25 };
+  if (score <= 4) return { label: 'Medium', color: 'from-amber-500 to-orange-400', variant: 'warning', percent: 50 };
+  if (score <= 6) return { label: 'Strong', color: 'from-emerald-500 to-emerald-400', variant: 'default', percent: 75 };
+  return { label: 'Very Strong', color: 'from-emerald-400 to-cyan-400', variant: 'success', percent: 100 };
 }
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.06, delayChildren: 0.1 } },
-};
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -79,130 +75,133 @@ export default function PasswordGeneratorPage() {
   }, [password]);
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="max-w-lg mx-auto"
+    <PageWrapper
+      icon={Key}
+      title={t.nav.passwordGen}
+      subtitle="Create secure, random passwords instantly"
+      badgeText="Secure"
+      colorScheme="fuchsia"
     >
-      <div className="relative overflow-hidden mb-6">
-        <div className="absolute -top-20 -left-20 w-80 h-80 bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="max-w-lg mx-auto">
+        <motion.div variants={itemVariants} initial="hidden" animate="visible">
+          <Card className="overflow-hidden bg-white/[0.02] backdrop-blur-xl border-white/10">
+            <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
+            <CardHeader className="relative">
+              <CardTitle className="text-white">Generate Password</CardTitle>
+              <CardDescription>Customize your password settings below</CardDescription>
+            </CardHeader>
+            <CardContent className="relative space-y-6">
+              
+              {/* Password Display with Shimmer Border */}
+              <div className="relative group">
+                <div className="absolute -inset-0.5 rounded-lg bg-gradient-to-r from-fuchsia-500 via-purple-500 to-pink-500 opacity-20 group-hover:opacity-50 blur transition duration-500 group-hover:duration-200 animate-gradient-xy"></div>
+                <div className="relative">
+                  <Input
+                    value={password}
+                    readOnly
+                    placeholder="Click generate to create a password"
+                    className="pr-20 text-lg font-mono tracking-wider h-14 bg-black/40 border-white/10 text-white placeholder:text-white/20"
+                  />
+                  {password && (
+                    <div className="absolute right-1.5 top-1.5 flex gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={handleCopy} 
+                        className={cn(
+                          "h-11 w-11 transition-all duration-300 relative overflow-hidden",
+                          copied ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-300" : "bg-white/5 text-white/70 hover:bg-fuchsia-500/20 hover:text-fuchsia-300 hover:shadow-[0_0_15px_rgba(217,70,239,0.3)]"
+                        )}
+                      >
+                        <AnimatePresence mode="wait">
+                          {copied ? (
+                            <motion.div
+                              key="check"
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              exit={{ scale: 0 }}
+                            >
+                              <Check className="h-4 w-4" />
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="copy"
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              exit={{ scale: 0 }}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
 
-        <div className="relative flex items-start gap-3 sm:gap-4 min-w-0">
-          <motion.div
-            initial={{ scale: 0.5, rotate: -10, opacity: 0 }}
-            animate={{ scale: 1, rotate: 0, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 20 }}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-fuchsia-500/20 via-purple-500/20 to-pink-500/20 border border-white/10 flex items-center justify-center shrink-0 shadow-[0_0_24px_rgba(217,70,239,0.2)]"
-          >
-            <Key className="w-5 h-5 sm:w-6 sm:h-6 text-fuchsia-200" />
-          </motion.div>
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2 mb-1.5">
-              <span className="px-2 py-0.5 rounded-full bg-fuchsia-500/15 text-fuchsia-300 text-[10px] font-semibold uppercase tracking-[0.18em] border border-fuchsia-400/20 inline-flex items-center gap-1.5">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-fuchsia-400 opacity-75" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-fuchsia-400 shadow-[0_0_6px_rgba(232,121,249,0.8)]" />
-                </span>
-                <ShieldCheck className="h-3 w-3" />
-                Secure
-              </span>
-              <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60 font-semibold">
-                Cryptographic
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient leading-tight text-balance">
-              {t.nav.passwordGen}
-            </h1>
-            <p className="text-sm text-muted-foreground/80 mt-1.5 max-w-2xl text-pretty">
-              Create secure, random passwords instantly
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-5 h-px divider-gradient" />
-      </div>
-
-      <motion.div variants={itemVariants}>
-        <Card className="overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
-          <CardHeader className="relative">
-            <CardTitle className="text-white">Generate Password</CardTitle>
-            <CardDescription>Customize your password settings below</CardDescription>
-          </CardHeader>
-          <CardContent className="relative space-y-6">
-            <div className="relative">
-              <Input
-                value={password}
-                readOnly
-                placeholder="Click generate to create a password"
-                className="pr-20 text-lg font-mono tracking-wider h-12"
-              />
-              {password && (
-                <div className="absolute right-1 top-1 flex gap-1">
-                  <Button variant="ghost" size="icon" onClick={handleCopy} className="h-10 w-10">
-                    {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
-                  </Button>
+              {strength && (
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-2.5 rounded-full bg-white/5 overflow-hidden border border-white/5 shadow-inner">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${strength.percent}%` }}
+                      transition={{ duration: 0.8, type: "spring", bounce: 0.2 }}
+                      className={cn('h-full rounded-full bg-gradient-to-r shadow-[0_0_10px_rgba(255,255,255,0.2)]', strength.color)}
+                    />
+                  </div>
+                  <Badge variant={strength.variant} className="animate-fade-in">{strength.label}</Badge>
                 </div>
               )}
-            </div>
 
-            {strength && (
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(strength.label === 'Weak' ? 25 : strength.label === 'Medium' ? 50 : strength.label === 'Strong' ? 75 : 100)}%` }}
-                    transition={{ duration: 0.5 }}
-                    className={cn('h-full rounded-full transition-all', strength.color)}
-                  />
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-white/80">Length: <span className="text-fuchsia-400">{length}</span></span>
                 </div>
-                <Badge variant={strength.variant}>{strength.label}</Badge>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-white/70">Length: {length}</span>
-              </div>
-              <Slider
-                value={[length]}
-                onValueChange={([v]) => setLength(v)}
-                min={8}
-                max={64}
-                step={1}
-              />
-              <div className="flex justify-between text-xs text-white/40">
-                <span>8</span>
-                <span>64</span>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {[
-                { key: 'upper', label: 'Uppercase (A-Z)' },
-                { key: 'lower', label: 'Lowercase (a-z)' },
-                { key: 'numbers', label: 'Numbers (0-9)' },
-                { key: 'symbols', label: 'Symbols (!@#$%)' },
-              ].map(({ key, label }) => (
-                <div key={key} className="flex items-center justify-between">
-                  <span className="text-sm text-white/70">{label}</span>
-                  <Switch
-                    checked={opts[key as keyof typeof opts]}
-                    onCheckedChange={(v) => setOpts((prev) => ({ ...prev, [key]: v }))}
-                  />
+                <Slider
+                  value={[length]}
+                  onValueChange={([v]) => setLength(v)}
+                  min={8}
+                  max={64}
+                  step={1}
+                  className="[&_[role=slider]]:bg-fuchsia-400 [&_[role=slider]]:border-fuchsia-300 [&_[role=slider]]:shadow-[0_0_10px_rgba(217,70,239,0.5)]"
+                />
+                <div className="flex justify-between text-xs text-white/40">
+                  <span>8</span>
+                  <span>64</span>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            <Button onClick={handleGenerate} size="lg" className="w-full gap-2">
-              <RefreshCw className="h-4 w-4" />
-              Generate Password
-            </Button>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </motion.div>
+              <div className="space-y-4 p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                {[
+                  { key: 'upper', label: 'Uppercase (A-Z)' },
+                  { key: 'lower', label: 'Lowercase (a-z)' },
+                  { key: 'numbers', label: 'Numbers (0-9)' },
+                  { key: 'symbols', label: 'Symbols (!@#$%)' },
+                ].map(({ key, label }) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <span className="text-sm text-white/80">{label}</span>
+                    <Switch
+                      checked={opts[key as keyof typeof opts]}
+                      onCheckedChange={(v) => setOpts((prev) => ({ ...prev, [key]: v }))}
+                      className="data-[state=checked]:bg-fuchsia-500"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <Button 
+                onClick={handleGenerate} 
+                size="lg" 
+                className="w-full gap-2 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 border-0 shadow-[0_0_20px_rgba(217,70,239,0.3)] hover:shadow-[0_0_25px_rgba(217,70,239,0.5)] transition-all"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Generate Password
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    </PageWrapper>
   );
 }

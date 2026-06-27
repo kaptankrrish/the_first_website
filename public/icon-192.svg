@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="50%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#ec4899"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.3)"/>
+      <stop offset="100%" style="stop-color:rgba(255,255,255,0)"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="40" fill="url(#bg)"/>
+  <rect width="192" height="96" rx="40" fill="url(#shine)"/>
+  <g transform="translate(96,96)">
+    <!-- Brain/AI icon -->
+    <circle cx="0" cy="-8" r="32" fill="none" stroke="white" stroke-width="3" opacity="0.9"/>
+    <path d="M-16,-8 Q-16,-24 0,-24 Q16,-24 16,-8" fill="none" stroke="white" stroke-width="2.5" opacity="0.8"/>
+    <path d="M-12,-8 Q-12,-20 0,-20 Q12,-20 12,-8" fill="none" stroke="white" stroke-width="2" opacity="0.6"/>
+    <circle cx="0" cy="-8" r="4" fill="white" opacity="0.9"/>
+    <circle cx="-10" cy="-12" r="2.5" fill="white" opacity="0.7"/>
+    <circle cx="10" cy="-12" r="2.5" fill="white" opacity="0.7"/>
+    <circle cx="-6" cy="-2" r="2" fill="white" opacity="0.6"/>
+    <circle cx="6" cy="-2" r="2" fill="white" opacity="0.6"/>
+    <!-- Connection lines -->
+    <line x1="0" y1="-4" x2="-10" y2="-12" stroke="white" stroke-width="1.5" opacity="0.4"/>
+    <line x1="0" y1="-4" x2="10" y2="-12" stroke="white" stroke-width="1.5" opacity="0.4"/>
+    <line x1="0" y1="-4" x2="-6" y2="-2" stroke="white" stroke-width="1.5" opacity="0.4"/>
+    <line x1="0" y1="-4" x2="6" y2="-2" stroke="white" stroke-width="1.5" opacity="0.4"/>
+    <!-- Sparkle -->
+    <path d="M24,-32 L26,-28 L30,-26 L26,-24 L24,-20 L22,-24 L18,-26 L22,-28 Z" fill="white" opacity="0.9"/>
+  </g>
+</svg>
