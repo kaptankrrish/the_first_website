@@ -3,69 +3,33 @@ import { XMLParser } from 'fast-xml-parser';
 
 // Use reliable, publicly accessible RSS feeds that don't block server requests
 const RSS_FEEDS = [
-  // BBC - very reliable
+  // World News
   'https://feeds.bbci.co.uk/news/world/rss.xml',
-  'https://feeds.bbci.co.uk/news/technology/rss.xml',
-  'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
-  'https://feeds.bbci.co.uk/news/business/rss.xml',
-  // Ars Technica - reliable tech news
-  'https://feeds.arstechnica.com/arstechnica/index',
-  // The Verge - reliable tech news
-  'https://www.theverge.com/rss/index.xml',
-  // Wired - tech/science
-  'https://www.wired.com/feed/rss',
-  // NASA - space news
-  'https://www.nasa.gov/news-release/feed/',
-  // TechCrunch - startup/tech
-  'https://techcrunch.com/feed/',
-  // The Hacker News - cybersecurity
-  'https://feeds.feedburner.com/TheHackersNews',
-  // Reuters - world news (new working URL)
-  'https://www.reutersagency.com/feed/?taxonomy=best-sectors&post_type=best',
-  // CNBC - finance
-  'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114',
-  // Moneycontrol - Finance (New)
-  'https://www.moneycontrol.com/rss/latestnews.xml',
-  'https://www.moneycontrol.com/rss/business.xml',
-  'https://www.moneycontrol.com/rss/marketreports.xml',
-  'https://www.moneycontrol.com/rss/economy.xml',
-  // Economic Times (New)
-  'https://economictimes.indiatimes.com/rssfeedsdefault.cms',
-  'https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms',
-  // Science Daily
-  'https://www.sciencedaily.com/rss/all.xml',
-  // CoinDesk - crypto
-  'https://www.coindesk.com/arc/outboundfeeds/rss/',
-  // The Guardian - world news
   'https://www.theguardian.com/world/rss',
-  // The Guardian - tech
-  'https://www.theguardian.com/technology/rss',
-  // NPR news
   'https://feeds.npr.org/1001/rss.xml',
-  // Al Jazeera
   'https://www.aljazeera.com/xml/rss/all.xml',
-  // India Today
-  'https://www.indiatoday.in/rss/home',
-  // NDTV
-  'https://feeds.feedburner.com/ndtvnews-top-stories',
-  // CNN
-  'http://rss.cnn.com/rss/cnn_topstories.rss',
-  // NYT Tech
-  'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',
-  // WSJ Tech
-  'https://feeds.a.dj.com/rss/RSSWSJD.xml',
-  // Engadget
+  'https://www.reutersagency.com/feed/',
+  // Technology
+  'https://feeds.bbci.co.uk/news/technology/rss.xml',
+  'https://www.theguardian.com/technology/rss',
+  'https://feeds.arstechnica.com/arstechnica/index',
+  'https://www.theverge.com/rss/index.xml',
+  'https://www.wired.com/feed/rss',
+  'https://techcrunch.com/feed/',
   'https://www.engadget.com/rss.xml',
-  // Mashable
-  'https://mashable.com/feeds/rss/all',
-  // CNET
   'https://www.cnet.com/rss/news/',
-  // Bloomberg Markets
-  'https://feeds.bloomberg.com/markets/news.rss',
-  // Forbes
-  'https://www.forbes.com/real-time/feed2/',
-  // TechRadar
+  'https://mashable.com/feeds/rss/all',
   'https://www.techradar.com/rss',
+  // Science & Space
+  'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
+  'https://www.sciencedaily.com/rss/all.xml',
+  'https://www.nasa.gov/news-release/feed/',
+  'https://www.space.com/feeds/all',
+  'https://www.livescience.com/feeds/all',
+  // Finance
+  'https://feeds.bbci.co.uk/news/business/rss.xml',
+  'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114',
+  'https://www.coindesk.com/arc/outboundfeeds/rss/',
 ];
 
 const parser = new XMLParser({
@@ -192,21 +156,21 @@ function getSourceName(feedUrl: string, link: string): string {
       if (hostname.includes('reuters')) return 'Reuters';
       if (hostname.includes('aljazeera')) return 'Al Jazeera';
       if (hostname.includes('techcrunch')) return 'TechCrunch';
-      if (hostname.includes('nytimes')) return 'NY Times';
-      if (hostname.includes('thehackernews')) return 'The Hacker News';
       if (hostname.includes('arstechnica')) return 'Ars Technica';
       if (hostname.includes('theverge')) return 'The Verge';
       if (hostname.includes('wired')) return 'WIRED';
       if (hostname.includes('nasa')) return 'NASA';
       if (hostname.includes('cnbc')) return 'CNBC';
-      if (hostname.includes('moneycontrol')) return 'Moneycontrol';
-      if (hostname.includes('economictimes')) return 'Economic Times';
       if (hostname.includes('sciencedaily')) return 'Science Daily';
       if (hostname.includes('coindesk')) return 'CoinDesk';
       if (hostname.includes('theguardian')) return 'The Guardian';
       if (hostname.includes('npr')) return 'NPR';
-      if (hostname.includes('indiatoday')) return 'India Today';
-      if (hostname.includes('ndtv')) return 'NDTV';
+      if (hostname.includes('engadget')) return 'Engadget';
+      if (hostname.includes('cnet')) return 'CNET';
+      if (hostname.includes('mashable')) return 'Mashable';
+      if (hostname.includes('techradar')) return 'TechRadar';
+      if (hostname.includes('space.com')) return 'Space.com';
+      if (hostname.includes('livescience')) return 'Live Science';
       return hostname.split('.')[0].charAt(0).toUpperCase() + hostname.split('.')[0].slice(1);
     }
     // Fallback to feed URL

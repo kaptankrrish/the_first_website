@@ -1,8 +1,21 @@
+const WORD_LIST = [
+  'algorithm', 'quantum', 'philosophy', 'hypothesis', 'nebula',
+  'paradox', 'velocity', 'metamorphosis', 'ephemeral', 'ubiquitous',
+  'serendipity', 'pragmatic', 'ambiguous', 'resilient', 'eloquent',
+  'benevolent', 'magnificent', 'luminous', 'transcendent', 'enigmatic',
+  'astronomy', 'botany', 'chemistry', 'ecology', 'geology',
+  'thermodynamics', 'microbiology', 'neuroscience', 'paleontology', 'genetics',
+  'democracy', 'renaissance', 'revolution', 'civilization', 'mythology',
+  'symphony', 'architecture', 'literature', 'photography', 'sculpture'
+];
+
+function getRandomWord(): string {
+  return WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
+}
+
 export async function fetchWordOfTheDay() {
   try {
-    // We fetch a random word from random-word-api, then get definition from dictionaryapi.dev
-    const wordRes = await fetch('https://random-word-api.herokuapp.com/word');
-    const [word] = await wordRes.json();
+    const word = getRandomWord();
     
     const defRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
     if (!defRes.ok) throw new Error('Not found');
