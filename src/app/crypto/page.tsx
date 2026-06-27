@@ -6,7 +6,12 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { InfiniteScroll } from '@/components/ui/infinite-scroll';
-import { ResponsiveContainer, AreaChart, Area, Tooltip } from 'recharts';
+import dynamic from 'next/dynamic';
+
+const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false });
+const AreaChart = dynamic(() => import('recharts').then(m => m.AreaChart), { ssr: false });
+const Area = dynamic(() => import('recharts').then(m => m.Area), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then(m => m.Tooltip), { ssr: false });
 import { Search, Star, TrendingUp, TrendingDown, DollarSign, BarChart3, Clock as ClockIcon, Bitcoin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

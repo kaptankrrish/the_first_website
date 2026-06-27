@@ -27,6 +27,7 @@ import { useSavedStore } from '@/store';
 import { getTimeAgo, truncate } from '@/utils';
 import type { Article, SavedItem } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/hooks/useToast';
 import { type Translations } from '@/translations';
 import {
   Dialog,
@@ -68,6 +69,7 @@ export default function NewsPage() {
 
   const { isSaved, addSavedItem, removeSavedItem } = useSavedStore();
   const { t, lang } = useLanguage();
+  const { success } = useToast();
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const [localSearch, setLocalSearch] = useState(searchQuery);
@@ -106,6 +108,7 @@ export default function NewsPage() {
     (article: Article) => {
       if (isSaved(article.id)) {
         removeSavedItem(article.id);
+        success('Article removed from reading list');
       } else {
         const item: SavedItem = {
           id: article.id,
@@ -117,9 +120,10 @@ export default function NewsPage() {
           savedAt: new Date().toISOString(),
         };
         addSavedItem(item);
+        success('Article saved to your reading list');
       }
     },
-    [isSaved, addSavedItem, removeSavedItem]
+    [isSaved, addSavedItem, removeSavedItem, success]
   );
 
   const handleTabChange = useCallback(
@@ -286,6 +290,7 @@ export default function NewsPage() {
                     const article = selectedArticle;
                     if (isSaved(article.id)) {
                       removeSavedItem(article.id);
+                      success('Article removed from reading list');
                     } else {
                       const item: SavedItem = {
                         id: article.id,
@@ -297,6 +302,7 @@ export default function NewsPage() {
                         savedAt: new Date().toISOString(),
                       };
                       addSavedItem(item);
+                      success('Article saved to your reading list');
                     }
                   }}
                   className="gap-2"

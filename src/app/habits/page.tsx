@@ -23,6 +23,8 @@ import * as Select from '@radix-ui/react-select';
 import { Check, Plus, Trash2, Flame, Target, CalendarDays, ChevronDown as ChevronDownIcon, Activity } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PageWrapper } from '@/components/layout/page-wrapper';
+import { useToast } from '@/hooks/useToast';
+import { ConfirmAction } from '@/components/ui/confirm-dialog';
 import type { Habit } from '@/types';
 
 interface HabitItemProps {
@@ -30,7 +32,8 @@ interface HabitItemProps {
   weekDays: string[];
   today: string;
   toggleHabit: (id: string, date: string) => void;
-  removeHabit: (id: string) => void;
+  onDelete: (id: string) => void;
+  onToggleSuccess: () => void;
   t: ReturnType<typeof useLanguage>['t'];
 }
 
@@ -47,7 +50,7 @@ const itemVariants = {
   exit: { opacity: 0, x: -20, scale: 0.95 },
 };
 
-const HabitItem = memo(function HabitItem({ habit, weekDays, today, toggleHabit, removeHabit, t }: HabitItemProps) {
+const HabitItem = memo(function HabitItem({ habit, weekDays, today, toggleHabit, onDelete, onToggleSuccess, t }: HabitItemProps) {
   return (
     <motion.div
       layout
@@ -82,7 +85,10 @@ const HabitItem = memo(function HabitItem({ habit, weekDays, today, toggleHabit,
           return (
             <button
               key={date}
-              onClick={() => toggleHabit(habit.id, date)}
+              onClick={() => {
+                toggleHabit(habit.id, date);
+                onToggleSuccess();
+              }}
               className={cn(
                 'w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium transition-all hover:scale-105 active:scale-95',
                 done
@@ -105,7 +111,7 @@ const HabitItem = memo(function HabitItem({ habit, weekDays, today, toggleHabit,
           variant="ghost"
           size="icon"
           className="h-7 w-7 ml-1 opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-opacity"
-          onClick={() => removeHabit(habit.id)}
+          onClick={() => onDelete(habit.id)}
         >
           <Trash2 className="w-3.5 h-3.5" />
         </Button>
@@ -117,11 +123,13 @@ const HabitItem = memo(function HabitItem({ habit, weekDays, today, toggleHabit,
 export default function HabitsPage() {
   const { t } = useLanguage();
   const { habits, addHabit, toggleHabit, removeHabit } = useHabitStore();
+  const { success } = useToast();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [frequency, setFrequency] = useState<'daily' | 'weekly'>('daily');
   const [color, setColor] = useState(HABIT_COLORS[0]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -171,6 +179,7 @@ export default function HabitsPage() {
       createdAt: new Date().toISOString(),
       color,
     });
+    success('Habit created');
     setName('');
     setDescription('');
     setColor(HABIT_COLORS[0]);
@@ -178,6 +187,7 @@ export default function HabitsPage() {
   };
 
   return (
+    <>
     <PageWrapper
       icon={Activity}
       title={t.nav.habits}
@@ -302,7 +312,8 @@ export default function HabitsPage() {
                           weekDays={weekDays} 
                           today={today} 
                           toggleHabit={toggleHabit} 
-                          removeHabit={removeHabit} 
+                          onDelete={(id) => setDeleteId(id)}
+                          onToggleSuccess={() => success('Habit logged for today')}
                           t={t} 
                         />
                       ))}
@@ -438,5 +449,20 @@ export default function HabitsPage() {
         </div>
       </div>
     </PageWrapper>
+    <ConfirmAction
+      open={deleteId !== null}
+      onOpenChange={() => setDeleteId(null)}
+      onConfirm={() => {
+        if (deleteId) {
+          removeHabit(deleteId);
+          setDeleteId(null);
+        }
+      }}
+      title="Delete Habit"
+      description="Are you sure you want to delete this habit? This action cannot be undone."
+      confirmLabel="Delete"
+      cancelLabel="Cancel"
+    />
+    </>
   );
 }

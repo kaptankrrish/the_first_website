@@ -21,6 +21,22 @@ import { fetchQuotes } from '@/services/quotes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PageWrapper } from '@/components/layout/page-wrapper';
 
+const colorMap: Record<string, { bg: string; text: string; border: string; hoverBorder: string; shadow: string; badgeBg: string; badgeText: string }> = {
+  blue: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', hoverBorder: 'hover:border-blue-500/40', shadow: 'hover:shadow-blue-500/5', badgeBg: 'bg-blue-500/10', badgeText: 'text-blue-300/80' },
+  green: { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30', hoverBorder: 'hover:border-green-500/40', shadow: 'hover:shadow-green-500/5', badgeBg: 'bg-green-500/10', badgeText: 'text-green-300/80' },
+  purple: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', hoverBorder: 'hover:border-purple-500/40', shadow: 'hover:shadow-purple-500/5', badgeBg: 'bg-purple-500/10', badgeText: 'text-purple-300/80' },
+  orange: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/30', hoverBorder: 'hover:border-orange-500/40', shadow: 'hover:shadow-orange-500/5', badgeBg: 'bg-orange-500/10', badgeText: 'text-orange-300/80' },
+  red: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30', hoverBorder: 'hover:border-red-500/40', shadow: 'hover:shadow-red-500/5', badgeBg: 'bg-red-500/10', badgeText: 'text-red-300/80' },
+  yellow: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30', hoverBorder: 'hover:border-yellow-500/40', shadow: 'hover:shadow-yellow-500/5', badgeBg: 'bg-yellow-500/10', badgeText: 'text-yellow-300/80' },
+  indigo: { bg: 'bg-indigo-500/20', text: 'text-indigo-400', border: 'border-indigo-500/30', hoverBorder: 'hover:border-indigo-500/40', shadow: 'hover:shadow-indigo-500/5', badgeBg: 'bg-indigo-500/10', badgeText: 'text-indigo-300/80' },
+  pink: { bg: 'bg-pink-500/20', text: 'text-pink-400', border: 'border-pink-500/30', hoverBorder: 'hover:border-pink-500/40', shadow: 'hover:shadow-pink-500/5', badgeBg: 'bg-pink-500/10', badgeText: 'text-pink-300/80' },
+  cyan: { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/30', hoverBorder: 'hover:border-cyan-500/40', shadow: 'hover:shadow-cyan-500/5', badgeBg: 'bg-cyan-500/10', badgeText: 'text-cyan-300/80' },
+  gray: { bg: 'bg-gray-500/20', text: 'text-gray-400', border: 'border-gray-500/30', hoverBorder: 'hover:border-gray-500/40', shadow: 'hover:shadow-gray-500/5', badgeBg: 'bg-gray-500/10', badgeText: 'text-gray-300/80' },
+  emerald: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/30', hoverBorder: 'hover:border-emerald-500/40', shadow: 'hover:shadow-emerald-500/5', badgeBg: 'bg-emerald-500/10', badgeText: 'text-emerald-300/80' },
+  rose: { bg: 'bg-rose-500/20', text: 'text-rose-400', border: 'border-rose-500/30', hoverBorder: 'hover:border-rose-500/40', shadow: 'hover:shadow-rose-500/5', badgeBg: 'bg-rose-500/10', badgeText: 'text-rose-300/80' },
+  amber: { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/30', hoverBorder: 'hover:border-amber-500/40', shadow: 'hover:shadow-amber-500/5', badgeBg: 'bg-amber-500/10', badgeText: 'text-amber-300/80' },
+};
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
@@ -289,8 +305,8 @@ function SearchContent() {
                 return (
                   <motion.div key={category.title} variants={containerVariants} className="space-y-4">
                     <div className="flex items-center gap-2 pb-2 border-b border-white/5">
-                      <div className={`p-1.5 rounded-md bg-${category.color}-500/20`}>
-                        <Icon className={`h-4 w-4 text-${category.color}-400`} />
+                      <div className={`p-1.5 rounded-md ${colorMap[category.color]?.bg || 'bg-gray-500/20'}`}>
+                        <Icon className={`h-4 w-4 ${colorMap[category.color]?.text || 'text-gray-400'}`} />
                       </div>
                       <h2 className="text-lg font-semibold text-white">
                         {category.title}
@@ -313,7 +329,7 @@ function SearchContent() {
                         return (
                           <motion.div key={item.id || i} variants={itemVariants}>
                             <Link href={href}>
-                              <Card className={`group h-full transition-all duration-300 hover:border-${category.color}-500/40 hover:bg-white/5 bg-white/[0.02] border-white/5 hover:shadow-lg hover:shadow-${category.color}-500/5 hover:-translate-y-0.5`}>
+                              <Card className={`group h-full transition-all duration-300 ${colorMap[category.color]?.hoverBorder || 'hover:border-gray-500/40'} hover:bg-white/5 bg-white/[0.02] border-white/5 hover:shadow-lg ${colorMap[category.color]?.shadow || 'hover:shadow-gray-500/5'} hover:-translate-y-0.5`}>
                                 <CardContent className="p-4 flex items-start gap-3 h-full">
                                   <div className="min-w-0 flex-1 flex flex-col h-full">
                                     <div className="text-sm font-medium text-white/90 group-hover:text-white transition-colors mb-1">
@@ -326,7 +342,7 @@ function SearchContent() {
                                     )}
                                     <div className="flex items-center gap-2 mt-auto pt-2 border-t border-white/5">
                                       {badge1 && (
-                                        <Badge variant="outline" className={`text-[9px] px-1.5 py-0 border-${category.color}-500/20 text-${category.color}-300/80 bg-${category.color}-500/10`}>
+                                        <Badge variant="outline" className={`text-[9px] px-1.5 py-0 ${colorMap[category.color]?.border || 'border-gray-500/30'} ${colorMap[category.color]?.badgeText || 'text-gray-300/80'} ${colorMap[category.color]?.badgeBg || 'bg-gray-500/10'}`}>
                                           {typeof badge1 === 'string' ? highlightText(badge1, debouncedQuery) : badge1}
                                         </Badge>
                                       )}

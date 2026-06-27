@@ -24,6 +24,13 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Plus,
   Trash2,
   Search,
@@ -320,7 +327,7 @@ export default function NotesPage() {
   const [newFolderName, setNewFolderName] = useState('');
   const [folderDialogOpen, setFolderDialogOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState('');
-  const [noteFolder] = useState('General');
+  const [noteFolder, setNoteFolder] = useState('General');
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
 
   const selectedNote = notes.find((n) => n.id === selectedNoteId);
@@ -430,7 +437,10 @@ export default function NotesPage() {
           </div>
         </DialogContent>
       </Dialog>
-      <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
+      <Dialog open={noteDialogOpen} onOpenChange={(open) => {
+        setNoteDialogOpen(open);
+        if (!open) setNoteFolder('General');
+      }}>
         <DialogTrigger asChild>
           <Button className="gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-lg shadow-amber-500/20 border-0 transition-all">
             <Plus className="w-4 h-4" />
@@ -450,6 +460,18 @@ export default function NotesPage() {
               onKeyDown={(e) => e.key === 'Enter' && handleCreateNote()}
               className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
             />
+            <Select value={noteFolder} onValueChange={setNoteFolder}>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                <SelectValue placeholder="Folder" />
+              </SelectTrigger>
+              <SelectContent className="bg-black/90 border-white/10">
+                {folders.map((folder: string) => (
+                  <SelectItem key={folder} value={folder} className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">
+                    {folder}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <div className="flex justify-end gap-2">
               <DialogClose asChild>
                 <Button variant="ghost" className="text-white hover:bg-white/10">{t.common.cancel}</Button>

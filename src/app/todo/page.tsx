@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PageWrapper } from '@/components/layout/page-wrapper';
+import { useToast } from '@/hooks/useToast';
 
 const priorityConfig = {
   low: { label: 'Low', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
@@ -80,6 +81,7 @@ const Confetti = ({ active }: { active: boolean }) => {
 export default function TodoPage() {
   const { t } = useLanguage();
   const { todos, addTodo, toggleTodo, removeTodo, updateTodo } = useTodoStore();
+  const { success } = useToast();
   const [text, setText] = useState('');
   const [category, setCategory] = useState('General');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
@@ -103,6 +105,7 @@ export default function TodoPage() {
   useEffect(() => {
     if (stats.total > 0 && stats.pending === 0 && !showConfetti) {
       setShowConfetti(true);
+      success('All tasks completed! Great job!');
       const timer = setTimeout(() => setShowConfetti(false), 4000);
       return () => clearTimeout(timer);
     }
@@ -122,6 +125,7 @@ export default function TodoPage() {
     setText('');
     setDueDate('');
     inputRef.current?.focus();
+    success('Task added');
   }, [text, category, priority, dueDate, addTodo]);
 
   const moveTodo = useCallback(
@@ -388,7 +392,10 @@ export default function TodoPage() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg ml-1"
-                            onClick={() => removeTodo(todo.id)}
+                            onClick={() => {
+                              removeTodo(todo.id);
+                              success('Task deleted');
+                            }}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
